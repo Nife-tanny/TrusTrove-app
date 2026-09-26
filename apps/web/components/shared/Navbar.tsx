@@ -10,7 +10,7 @@ import { useWalletStore } from "@/store/wallet";
 import { useBalances } from "@/hooks/useBalances";
 import { useProfile } from "@/hooks/useProfile";
 import { useNotifications } from "@/hooks/useNotifications";
-import { Wallet, Shield, Terminal, ExternalLink, Menu, X } from "lucide-react";
+import { Wallet, Shield, Terminal, ExternalLink, Menu, X, Settings } from "lucide-react";
 import { NotificationBell } from "./NotificationBell";
 
 const ROLES = ["issuer", "buyer", "lp"] as const;
@@ -36,6 +36,7 @@ export function Navbar() {
     { name: "Marketplace", href: "/marketplace" },
     { name: "Analytics", href: "/analytics" },
     { name: "Profile", href: "/profile" },
+    { name: "Settings", href: "/settings", icon: Settings },
   ];
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
@@ -61,6 +62,7 @@ export function Navbar() {
             <div className="hidden md:flex space-x-1">
               {navItems.map((item) => {
                 const isActive = pathname === item.href;
+                const Icon = item.icon;
                 return (
                   <Link
                     key={item.href}
@@ -71,6 +73,7 @@ export function Navbar() {
                         : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/60"
                     }`}
                   >
+                    {Icon && <Icon className="w-3.5 h-3.5" />}
                     <span>{item.name}</span>
                     {item.name === "Profile" && connected && isVerified && (
                       <span
@@ -208,6 +211,7 @@ export function Navbar() {
           <div className="flex flex-col gap-2">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
+              const Icon = item.icon;
               return (
                 <Link
                   key={item.href}
@@ -219,7 +223,10 @@ export function Navbar() {
                       : "border-border bg-background-secondary/70 text-muted-foreground hover:border-primary/30 hover:text-foreground"
                   }`}
                 >
-                  <span>{item.name}</span>
+                  <span className="flex items-center gap-2">
+                    {Icon && <Icon className="w-4 h-4" />}
+                    {item.name}
+                  </span>
                   {item.name === "Profile" && connected && isVerified && (
                     <span
                       className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"
