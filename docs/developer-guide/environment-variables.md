@@ -13,6 +13,7 @@
 | `NEXT_PUBLIC_USDC_ISSUER`          | Frontend + Backend | USDC issuer on Stellar testnet           | `GBBD...`                                            |
 | `NEXT_PUBLIC_USDC_ASSET_CODE`      | Frontend + Backend | USDC asset code                          | `USDC`                                               |
 | `NEXT_PUBLIC_API_BASE_URL`         | Frontend only      | Indexer API base URL                     | `http://localhost:8080`                              |
+| `CSP_ENFORCE`                      | Frontend only      | Enforce the CSP (default: report-only)   | `true`                                               |
 | `STELLAR_NETWORK`                  | Backend only       | Network name                             | `testnet`                                            |
 | `HORIZON_URL`                      | Backend only       | Horizon REST API endpoint                | `https://horizon-testnet.stellar.org`                |
 | `SOROBAN_RPC_URL`                  | Backend only       | Soroban RPC endpoint                     | `https://soroban-testnet.stellar.org`                |
@@ -31,6 +32,8 @@
 | `JWT_SECRET`                       | Backend only       | Secret for JWT signing                   | `your-secret-here`                                   |
 | `JWT_EXPIRY_HOURS`                 | Backend only       | JWT token expiry                         | `24`                                                 |
 | `ALLOWED_ORIGINS`                  | Backend only       | Allowed CORS origins for the indexer API | `https://trustrove.vercel.app,http://localhost:3000` |
+
+> **Note:** `CSP_ENFORCE` is read by the web app's middleware at request time, so it takes effect on restart or redeploy without a rebuild. See [Security Headers](security-headers.md).
 
 > **Note:** `AGENT_REGISTRY_CONTRACT` is deployed from Underwrite's separate `underwrite-contract` repo, not from this monorepo.
 
