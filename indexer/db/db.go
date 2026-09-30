@@ -7,7 +7,6 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"time"
 
@@ -92,6 +91,25 @@ func RunMigration(ctx context.Context) error {
 		return err
 	}
 
+	// Read and validate the filenames before touching the database, so a
+	// duplicate migration number fails fast without applying anything.
+	files, err := os.ReadDir(migrationDir)
+	if err != nil {
+		return fmt.Errorf("failed to read migration directory %s: %w", migrationDir, err)
+	}
+
+	names := make([]string, 0, len(files))
+	for _, file := range files {
+		if !file.IsDir() {
+			names = append(names, file.Name())
+		}
+	}
+
+	migrationFiles, err := validateMigrationNames(names)
+	if err != nil {
+		return fmt.Errorf("migration directory %s: %w", migrationDir, err)
+	}
+
 	lockConn, err := Pool.Acquire(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to acquire connection for migration lock: %w", err)
@@ -106,24 +124,6 @@ func RunMigration(ctx context.Context) error {
 	if err := ensureSchemaMigrationsTable(ctx); err != nil {
 		return fmt.Errorf("failed to ensure schema_migrations table: %w", err)
 	}
-
-	files, err := os.ReadDir(migrationDir)
-	if err != nil {
-		return fmt.Errorf("failed to read migration directory %s: %w", migrationDir, err)
-	}
-
-	migrationFiles := make([]string, 0, len(files))
-	for _, file := range files {
-		if file.IsDir() {
-			continue
-		}
-		name := file.Name()
-		if strings.HasSuffix(name, ".sql") {
-			migrationFiles = append(migrationFiles, name)
-		}
-	}
-
-	sort.Strings(migrationFiles)
 
 	applied, err := loadAppliedMigrations(ctx)
 	if err != nil {
