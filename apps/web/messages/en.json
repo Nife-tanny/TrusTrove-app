@@ -173,6 +173,69 @@
       "close": "[Close Esc]"
     }
   },
+  "Marketplace": {
+    "header": {
+      "title": "Invoice Marketplace",
+      "description": "Audit list of tokenized trade obligations listed on the Stellar Soroban network.",
+      "liquidityLabel": "Pool Liquidity Available"
+    },
+    "syncing": "Syncing...",
+    "verificationBanner": {
+      "title": "Profile Verification Required",
+      "body": "Your connected wallet address is not verified on-chain. To fund invoices or execute smart contract operations, you must register your business credentials. Go to the <link>[Profile Page]</link> to register."
+    },
+    "filters": {
+      "status": {
+        "label": "Maturity Status",
+        "options": {
+          "all": "All Invoices",
+          "created": "Created",
+          "listed": "Listed (Awaiting Liquidity)",
+          "funded": "Funded (USDC Deployed)",
+          "active": "Active (Shipped)",
+          "confirmed": "Confirmed (Delivered)",
+          "repaid": "Repaid (Settled)",
+          "defaulted": "Defaulted"
+        }
+      },
+      "minValue": {
+        "label": "Min Value",
+        "placeholder": "e.g. 5000"
+      },
+      "maxValue": {
+        "label": "Max Value",
+        "placeholder": "e.g. 50000"
+      },
+      "maxDiscount": {
+        "label": "Max Discount Rate",
+        "ariaLabel": "Maximum discount rate"
+      }
+    },
+    "invoices": {
+      "title": "Available Invoices ({count})",
+      "emptyState": {
+        "title": "No invoices match your filters",
+        "description": "Try broadening the amount range or resetting the filters to reveal more listed invoices.",
+        "action": "Reset Filters"
+      }
+    },
+    "console": {
+      "title": "Management Center",
+      "role": "Consoling role: <strong>{role}</strong>",
+      "publicView": "PUBLIC VIEW",
+      "clear": "Clear select",
+      "fundingPreview": {
+        "title": "POOL FINANCING PREVIEW",
+        "faceValue": "Face Value:",
+        "fundedCost": "Funded Cost (at {bps} bps):",
+        "note": "Funding this invoice deploys USDC from the pool contract into escrow. LPs earn the discount difference upon repayment."
+      },
+      "emptyState": {
+        "title": "NO INVOICE SELECTED",
+        "description": "Select an obligation from the ledger table to view its parameters and execute smart contract actions."
+      }
+    }
+  },
   "Common": {
     "loading": "Loading…",
     "error": "Something went wrong",
