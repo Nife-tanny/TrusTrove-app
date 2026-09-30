@@ -111,6 +111,24 @@ The indexer automatically applies pending migrations on startup by:
 2. Tracking applied migrations in a `schema_migrations` table
 3. Executing only migrations that have not yet been applied
 
+### One number per migration
+
+Every migration gets its own number. Files are applied in filename order and recorded by their full name, so two files that share a number both run, in whatever order their descriptions happen to sort. That is how the `002_` and `009_` collisions reached `main`.
+
+- **Name:** `NNN_lowercase_description.sql`, matching `^\d{3}_[a-z0-9_]+\.sql$`: three digits, an underscore, then lowercase letters, digits and underscores (for example `011_add_invoice_currency.sql`).
+- **Numbering:** numbers run `001`, `002`, `003`, ... with no gaps and no reuse. Use the highest number on `main` plus one.
+- **Check right before merging:** another PR may have taken your number since you branched. Rebase on the latest `main` and confirm the number is still free.
+- **If two PRs pick the same number:** whichever merges second rebases and renumbers its migration to the next free number. Never edit or renumber a migration that is already on `main`; databases have recorded it by name.
+
+Two checks enforce this:
+
+- `TestMigrationsDir_NamesAreValid` (`indexer/db`, runs with `go test ./...`, no database needed) fails on a duplicate number, a name that doesn't match the pattern, or a gap in the sequence.
+- On startup, `RunMigration` refuses to apply anything if two files share a number or a name doesn't match the pattern, for example: `duplicate migration number 011: 011_add_a.sql, 011_add_b.sql (each migration needs a unique NNN_ prefix)`. A gap does not stop the indexer.
+
+The existing `009_add_webhook_subscriptions.sql` / `009_webhooks.sql` pair is the only tolerated duplicate, listed in `knownDuplicateMigrations` in `indexer/db/migration_names.go` until [#880](https://github.com/TrusTrove/TrusTrove-app/issues/880) resolves it. Don't add entries there; renumber the new migration instead.
+
+Two PRs can each pass CI on their own and still collide once both merge. Requiring branches to be up to date before merging (or using a merge queue) makes the check run against the combined result.
+
 ### Rolling back database changes
 
 The indexer uses a forward-only migration system with no down-migration scripts. To roll back changes or reset your local database:
