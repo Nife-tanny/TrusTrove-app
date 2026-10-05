@@ -102,7 +102,7 @@ func getProtocolStats(ctx context.Context, q Querier) (*ProtocolStats, error) {
 // statements, or against a pgx.Tx when several statements must commit or
 // roll back together (see db.WithTx and the listener's event handling).
 
-func InsertInvoice(ctx context.Context, q Querier, inv *DbInvoice) error {
+func InsertInvoice(ctx context.Context, q Querier, inv *DbInvoice) (bool, error) {
 	query := `
 		INSERT INTO invoices (
 			id, issuer, buyer, face_value, discount_bps, funded_amount, due_date, status, created_at,
@@ -113,6 +113,7 @@ func InsertInvoice(ctx context.Context, q Querier, inv *DbInvoice) error {
 			@funded_at, @shipped_at, @issuer_confirmed, @buyer_confirmed, @buyer_confirmed_at, @repaid_at,
 			@attestation_agent_id, @risk_score_bps, @evidence_hash, @attested_at
 		)
+		ON CONFLICT (id) DO NOTHING
 	`
 	args := pgx.NamedArgs{
 		"id":                   inv.ID,
@@ -135,11 +136,11 @@ func InsertInvoice(ctx context.Context, q Querier, inv *DbInvoice) error {
 		"evidence_hash":        inv.EvidenceHash,
 		"attested_at":          inv.AttestedAt,
 	}
-	_, err := q.Exec(ctx, query, args)
+	tag, err := q.Exec(ctx, query, args)
 	if err != nil {
-		return fmt.Errorf("queries: insert invoice: %w", err)
+		return false, fmt.Errorf("queries: insert invoice: %w", err)
 	}
-	return nil
+	return tag.RowsAffected() > 0, nil
 }
 
 func GetInvoiceByID(ctx context.Context, q Querier, id string) (*DbInvoice, error) {

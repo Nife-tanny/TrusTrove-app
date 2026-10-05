@@ -47,7 +47,7 @@ func TestInsertAndGetInvoice(t *testing.T) {
 		CreatedAt:    time.Now().Unix(),
 	}
 
-	if err := InsertInvoice(ctx, Pool, inv); err != nil {
+	if _, err := InsertInvoice(ctx, Pool, inv); err != nil {
 		t.Fatalf("InsertInvoice: %v", err)
 	}
 	t.Cleanup(func() {
@@ -71,6 +71,44 @@ func TestInsertAndGetInvoice(t *testing.T) {
 	}
 	if got.FaceValue != inv.FaceValue {
 		t.Errorf("GetInvoiceByID: got FaceValue %q, want %q", got.FaceValue, inv.FaceValue)
+	}
+}
+
+func TestInsertInvoiceDuplicateIsIgnored(t *testing.T) {
+	skipIfNoDB(t)
+
+	ctx := context.Background()
+	id := fmt.Sprintf("duplicate-test%d", time.Now().UnixNano())
+	inv := newTestInvoice(id)
+
+	inserted, err := InsertInvoice(ctx, Pool, inv)
+	if err != nil {
+		t.Fatalf("first InsertInvoice: %v", err)
+	}
+	if !inserted {
+		t.Fatal("first InsertInvoice: got inserted=false, want true")
+	}
+
+	t.Cleanup(func() {
+		if Pool != nil {
+			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+		}
+	})
+
+	inserted, err = InsertInvoice(ctx, Pool, inv)
+	if err != nil {
+		t.Fatalf("duplicate InsertInvoice: %v", err)
+	}
+	if inserted {
+		t.Fatal("duplicate InsertInvoice: got inserted=true, want false")
+	}
+
+	var count int
+	if err := Pool.QueryRow(ctx, "SELECT COUNT(*) FROM invoices WHERE id = $1", id).Scan(&count); err != nil {
+		t.Fatalf("count inserted invoices: %v", err)
+	}
+	if count != 1 {
+		t.Errorf("invoice row count: got %d, want 1", count)
 	}
 }
 
@@ -107,7 +145,7 @@ func TestGetInvoicesPage(t *testing.T) {
 			Status:       "Created",
 			CreatedAt:    time.Now().Unix(),
 		}
-		if err := InsertInvoice(ctx, Pool, inv); err != nil {
+		if _, err := InsertInvoice(ctx, Pool, inv); err != nil {
 			t.Fatalf("InsertInvoice %s: %v", id, err)
 		}
 	}
@@ -213,7 +251,7 @@ func TestGetProtocolStats_CountsListenerStatuses(t *testing.T) {
 		inv.Status = s.status
 		inv.FundedAmount = s.funded
 		inv.DiscountBps = s.discountBps
-		if err := InsertInvoice(ctx, tx, inv); err != nil {
+		if _, err := InsertInvoice(ctx, tx, inv); err != nil {
 			t.Fatalf("InsertInvoice %s: %v", s.status, err)
 		}
 	}
@@ -318,7 +356,7 @@ func TestUpdateInvoiceListed(t *testing.T) {
 
 	ctx := context.Background()
 	id := fmt.Sprintf("listed-test%d", time.Now().UnixNano())
-	if err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
+	if _, err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
 		t.Fatalf("InsertInvoice: %v", err)
 	}
 	t.Cleanup(func() {
@@ -348,7 +386,7 @@ func TestUpdateInvoiceFunded(t *testing.T) {
 
 	ctx := context.Background()
 	id := fmt.Sprintf("funded-test%d", time.Now().UnixNano())
-	if err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
+	if _, err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
 		t.Fatalf("InsertInvoice: %v", err)
 	}
 	t.Cleanup(func() {
@@ -382,7 +420,7 @@ func TestUpdateInvoiceShipped(t *testing.T) {
 
 	ctx := context.Background()
 	id := fmt.Sprintf("shipped-test%d", time.Now().UnixNano())
-	if err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
+	if _, err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
 		t.Fatalf("InsertInvoice: %v", err)
 	}
 	t.Cleanup(func() {
@@ -416,7 +454,7 @@ func TestUpdateInvoiceDeliveryConfirmed(t *testing.T) {
 
 	ctx := context.Background()
 	id := fmt.Sprintf("delivered-test%d", time.Now().UnixNano())
-	if err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
+	if _, err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
 		t.Fatalf("InsertInvoice: %v", err)
 	}
 	t.Cleanup(func() {
@@ -450,7 +488,7 @@ func TestUpdateInvoiceRepaid(t *testing.T) {
 
 	ctx := context.Background()
 	id := fmt.Sprintf("repaid-test%d", time.Now().UnixNano())
-	if err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
+	if _, err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
 		t.Fatalf("InsertInvoice: %v", err)
 	}
 	t.Cleanup(func() {
@@ -481,7 +519,7 @@ func TestUpdateInvoiceStatus(t *testing.T) {
 
 	ctx := context.Background()
 	id := fmt.Sprintf("status-test%d", time.Now().UnixNano())
-	if err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
+	if _, err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
 		t.Fatalf("InsertInvoice: %v", err)
 	}
 	t.Cleanup(func() {
@@ -686,7 +724,7 @@ func TestUpdateInvoiceAttestation(t *testing.T) {
 		CreatedAt:    time.Now().Unix(),
 	}
 
-	if err := InsertInvoice(ctx, Pool, inv); err != nil {
+	if _, err := InsertInvoice(ctx, Pool, inv); err != nil {
 		t.Fatalf("InsertInvoice: %v", err)
 	}
 	t.Cleanup(func() {
@@ -744,7 +782,7 @@ func TestInvoiceCheckConstraints(t *testing.T) {
 
 	ctx := context.Background()
 	id := fmt.Sprintf("constraint-test%d", time.Now().UnixNano())
-	if err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
+	if _, err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
 		t.Fatalf("InsertInvoice: %v", err)
 	}
 	t.Cleanup(func() {
