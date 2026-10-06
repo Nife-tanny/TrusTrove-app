@@ -23,6 +23,7 @@ var configEnvNames = []string{
 	"JWT_SECRET",
 	"SERVER_SEED",
 	"INDEXER_POLL_INTERVAL_MS",
+	"INDEXER_CONFIRMATION_DEPTH",
 	"JWT_EXPIRY_HOURS",
 	"API_PORT",
 	"PORT",
@@ -89,6 +90,44 @@ func TestLoadConfigWebhookConcurrency(t *testing.T) {
 			}
 			if cfg.WebhookConcurrency != tc.want {
 				t.Errorf("WebhookConcurrency = %d, want %d for WEBHOOK_WORKER_CONCURRENCY=%q", cfg.WebhookConcurrency, tc.want, tc.value)
+			}
+		})
+	}
+}
+
+// TestLoadConfigIndexerConfirmationDepth covers the reorg buffer setting
+// added for issue #882: it defaults to 3, accepts an explicit opt-out (0),
+// and unusable values must not be able to stall indexing indefinitely.
+func TestLoadConfigIndexerConfirmationDepth(t *testing.T) {
+	cases := []struct {
+		value string
+		want  int
+	}{
+		{"", 3},
+		{"0", 0},
+		{"5", 5},
+		{"100", maxConfirmationDepth},
+		{"-2", 3},
+		{"not-a-number", 3},
+	}
+
+	for _, tc := range cases {
+		name := tc.value
+		if name == "" {
+			name = "unset"
+		}
+		t.Run(name, func(t *testing.T) {
+			env := requiredConfigEnv()
+			env["INDEXER_CONFIRMATION_DEPTH"] = tc.value
+			setConfigEnv(t, env)
+
+			cfg, err := LoadConfig()
+			if err != nil {
+				t.Fatalf("LoadConfig: %v", err)
+			}
+			if cfg.IndexerConfirmationDepth != tc.want {
+				t.Errorf("IndexerConfirmationDepth = %d, want %d for INDEXER_CONFIRMATION_DEPTH=%q",
+					cfg.IndexerConfirmationDepth, tc.want, tc.value)
 			}
 		})
 	}

@@ -15,33 +15,37 @@ import (
 	"github.com/stellar/go-stellar-sdk/keypair"
 )
 
+// maxConfirmationDepth caps INDEXER_CONFIRMATION_DEPTH so a mistyped value
+// cannot stall event indexing indefinitely. 20 ledgers is ~100s.
+const maxConfirmationDepth = 20
+
 type Config struct {
-	StellarNetwork         string
-	HorizonURL             string
-	SorobanRPCURL          string
-	NetworkPassphrase      string
-	RegistryContractID     string
-	InvoiceContractID      string
-	PoolContractID         string
-	EscrowContractID       string
-	USDCIssuer             string
-	USDCAssetCode          string
-	DatabaseURL            string
-	APIPort                string
-	IndexerPollIntervalMs  int
-	JWTSecret              string
-	JWTSecretGenerated     bool
-	JWTExpiryHours         int
-	CORSAllowedOrigins     []string
-	TrustedProxyCIDRs      []string
-	RateLimitRPS           int
-	InvoiceRateLimit       int
-	InvoiceRateLimitWindow time.Duration
-	WebhookConcurrency     int
-	ServerSeed             string
-	ServerSeedGenerated    bool
-	SentryDSN              string
-	MetricsToken           string
+	StellarNetwork           string
+	HorizonURL               string
+	SorobanRPCURL            string
+	NetworkPassphrase        string
+	RegistryContractID       string
+	InvoiceContractID        string
+	PoolContractID           string
+	EscrowContractID         string
+	USDCIssuer               string
+	USDCAssetCode            string
+	DatabaseURL              string
+	APIPort                  string
+	IndexerPollIntervalMs    int
+	IndexerConfirmationDepth int
+	JWTSecret                string
+	JWTSecretGenerated       bool
+	JWTExpiryHours           int
+	CORSAllowedOrigins       []string
+	RateLimitRPS             int
+	InvoiceRateLimit         int
+	InvoiceRateLimitWindow   time.Duration
+	WebhookConcurrency       int
+	ServerSeed               string
+	ServerSeedGenerated      bool
+	SentryDSN                string
+	MetricsToken             string
 }
 
 func LoadConfig() (*Config, error) {
@@ -105,6 +109,24 @@ func LoadConfig() (*Config, error) {
 	if pollIntervalMsStr != "" {
 		if val, err := strconv.Atoi(pollIntervalMsStr); err == nil {
 			pollIntervalMs = val
+		}
+	}
+
+	// Reorg buffer for the event listener (issue #882). Clamped so a typo
+	// cannot stall indexing indefinitely; 0 explicitly opts out of the buffer.
+	confirmationDepth := 3
+	if depthStr := strings.TrimSpace(os.Getenv("INDEXER_CONFIRMATION_DEPTH")); depthStr != "" {
+		switch val, err := strconv.Atoi(depthStr); {
+		case err != nil:
+			slog.Warn("INDEXER_CONFIRMATION_DEPTH is not a number; using default", "default", confirmationDepth)
+		case val < 0:
+			slog.Warn("INDEXER_CONFIRMATION_DEPTH is negative; using default", "default", confirmationDepth)
+		case val > maxConfirmationDepth:
+			slog.Warn("INDEXER_CONFIRMATION_DEPTH exceeds the maximum; clamping",
+				"requested", val, "max", maxConfirmationDepth)
+			confirmationDepth = maxConfirmationDepth
+		default:
+			confirmationDepth = val
 		}
 	}
 
@@ -186,32 +208,32 @@ func LoadConfig() (*Config, error) {
 	}
 
 	cfg := &Config{
-		StellarNetwork:         getRequired("STELLAR_NETWORK"),
-		HorizonURL:             getRequired("HORIZON_URL"),
-		SorobanRPCURL:          getRequired("SOROBAN_RPC_URL"),
-		NetworkPassphrase:      getRequired("NETWORK_PASSPHRASE"),
-		RegistryContractID:     getRequired("REGISTRY_CONTRACT_ID"),
-		InvoiceContractID:      getRequired("INVOICE_CONTRACT_ID"),
-		PoolContractID:         getRequired("POOL_CONTRACT_ID"),
-		EscrowContractID:       getRequired("ESCROW_CONTRACT_ID"),
-		USDCIssuer:             getRequired("USDC_ISSUER"),
-		USDCAssetCode:          getRequired("USDC_ASSET_CODE"),
-		DatabaseURL:            getRequired("DATABASE_URL"),
-		APIPort:                apiPort,
-		IndexerPollIntervalMs:  pollIntervalMs,
-		JWTSecret:              jwtSecret,
-		JWTSecretGenerated:     jwtSecretGenerated,
-		JWTExpiryHours:         jwtExpiryHours,
-		CORSAllowedOrigins:     corsOrigins,
-		TrustedProxyCIDRs:      trustedProxyList,
-		RateLimitRPS:           rateLimitRPS,
-		InvoiceRateLimit:       invoiceRateLimit,
-		InvoiceRateLimitWindow: invoiceRateLimitWindow,
-		WebhookConcurrency:     webhookConcurrency,
-		ServerSeed:             serverSeed,
-		ServerSeedGenerated:    serverSeedGenerated,
-		SentryDSN:              strings.TrimSpace(os.Getenv("SENTRY_DSN")),
-		MetricsToken:           strings.TrimSpace(os.Getenv("METRICS_TOKEN")),
+		StellarNetwork:           getRequired("STELLAR_NETWORK"),
+		HorizonURL:               getRequired("HORIZON_URL"),
+		SorobanRPCURL:            getRequired("SOROBAN_RPC_URL"),
+		NetworkPassphrase:        getRequired("NETWORK_PASSPHRASE"),
+		RegistryContractID:       getRequired("REGISTRY_CONTRACT_ID"),
+		InvoiceContractID:        getRequired("INVOICE_CONTRACT_ID"),
+		PoolContractID:           getRequired("POOL_CONTRACT_ID"),
+		EscrowContractID:         getRequired("ESCROW_CONTRACT_ID"),
+		USDCIssuer:               getRequired("USDC_ISSUER"),
+		USDCAssetCode:            getRequired("USDC_ASSET_CODE"),
+		DatabaseURL:              getRequired("DATABASE_URL"),
+		APIPort:                  apiPort,
+		IndexerPollIntervalMs:    pollIntervalMs,
+		IndexerConfirmationDepth: confirmationDepth,
+		JWTSecret:                jwtSecret,
+		JWTSecretGenerated:       jwtSecretGenerated,
+		JWTExpiryHours:           jwtExpiryHours,
+		CORSAllowedOrigins:       corsOrigins,
+		RateLimitRPS:             rateLimitRPS,
+		InvoiceRateLimit:         invoiceRateLimit,
+		InvoiceRateLimitWindow:   invoiceRateLimitWindow,
+		WebhookConcurrency:       webhookConcurrency,
+		ServerSeed:               serverSeed,
+		ServerSeedGenerated:      serverSeedGenerated,
+		SentryDSN:                strings.TrimSpace(os.Getenv("SENTRY_DSN")),
+		MetricsToken:             strings.TrimSpace(os.Getenv("METRICS_TOKEN")),
 	}
 
 	if len(missing) > 0 {
