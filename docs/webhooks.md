@@ -87,10 +87,13 @@ The signature is computed as `HMAC_SHA256(secret, timestamp + "." + payload)`.
 
 ### Delivery Guarantees
 
-**Delivery is at-least-once, never exactly-once.** Subscribe idempotently and
-de-duplicate on `event_id`: a subscriber that returns 2xx slowly, an indexer
-that is killed mid-attempt, or two indexer replicas running during a rolling
-deploy can all result in the same `event_id` being delivered more than once.
+**The queue creates at most one delivery row per subscription and `event_id`,
+but HTTP delivery is at-least-once, not exactly-once.** Reprocessing the same
+on-chain event does not add another queue row for that subscription. However,
+a subscriber that returns 2xx slowly, an indexer that is killed mid-attempt, or
+two indexer replicas during a rolling deploy can cause the existing row to be
+sent more than once. Subscribers should therefore de-duplicate HTTP requests
+using `event_id`.
 
 The queue guarantees the weaker property that no delivery is lost and no two
 workers attempt the same row at the same time:

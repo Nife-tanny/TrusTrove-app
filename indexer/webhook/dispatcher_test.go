@@ -396,6 +396,50 @@ func TestDispatchQueuesPopulatedEnvelope(t *testing.T) {
 	}
 }
 
+func TestDispatchSameEventQueuesOneDeliveryPerSubscription(t *testing.T) {
+	skipIfNoDB(t)
+	ctx := context.Background()
+
+	sub := &db.WebhookSubscription{
+		TargetURL:     "https://example.invalid/webhook-916",
+		EventTypes:    []string{"fund_invoice"},
+		SigningSecret: "synthetic-secret-916",
+		Active:        true,
+	}
+	if err := db.CreateWebhookSubscription(ctx, sub); err != nil {
+		t.Fatalf("CreateWebhookSubscription: %v", err)
+	}
+	t.Cleanup(func() {
+		if db.Pool != nil {
+			_, _ = db.Pool.Exec(ctx, "DELETE FROM webhook_subscriptions WHERE id = $1", sub.ID)
+			_, _ = db.Pool.Exec(ctx, "DELETE FROM webhook_deliveries WHERE subscription_id = $1", sub.ID)
+		}
+	})
+
+	eventID := fmt.Sprintf("dispatch-916-%d", time.Now().UnixNano())
+	data := invoiceDispatchData("fund_invoice")
+	data["event_id"] = eventID
+
+	dispatcher := NewDispatcher()
+	for attempt := 0; attempt < 2; attempt++ {
+		if err := dispatcher.EnqueueDeliveries(ctx, db.Pool, "fund_invoice", data); err != nil {
+			t.Fatalf("EnqueueDeliveries attempt %d: %v", attempt+1, err)
+		}
+	}
+
+	var count int
+	if err := db.Pool.QueryRow(ctx, `
+		SELECT COUNT(*)
+		FROM webhook_deliveries
+		WHERE subscription_id = $1 AND event_id = $2
+	`, sub.ID, eventID).Scan(&count); err != nil {
+		t.Fatalf("count webhook deliveries: %v", err)
+	}
+	if count != 1 {
+		t.Fatalf("delivery count for subscription %s and event %s: got %d, want 1", sub.ID, eventID, count)
+	}
+}
+
 // TestDispatchWithoutSubscriptionsQueuesNothing keeps Dispatch's early return
 // honest: no rows (and no wasted envelope builds) for untracked events.
 func TestDispatchWithoutSubscriptionsQueuesNothing(t *testing.T) {
