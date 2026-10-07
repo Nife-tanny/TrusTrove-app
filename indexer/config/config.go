@@ -38,6 +38,7 @@ type Config struct {
 	JWTSecretGenerated       bool
 	JWTExpiryHours           int
 	CORSAllowedOrigins       []string
+	TrustedProxyCIDRs        []string
 	RateLimitRPS             int
 	InvoiceRateLimit         int
 	InvoiceRateLimitWindow   time.Duration
@@ -226,6 +227,7 @@ func LoadConfig() (*Config, error) {
 		JWTSecretGenerated:       jwtSecretGenerated,
 		JWTExpiryHours:           jwtExpiryHours,
 		CORSAllowedOrigins:       corsOrigins,
+		TrustedProxyCIDRs:        trustedProxyList,
 		RateLimitRPS:             rateLimitRPS,
 		InvoiceRateLimit:         invoiceRateLimit,
 		InvoiceRateLimitWindow:   invoiceRateLimitWindow,
