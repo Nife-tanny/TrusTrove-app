@@ -213,14 +213,11 @@ de-duplicating on `event_id` (which you need anyway, see
 [Delivery Guarantees](#delivery-guarantees)) makes a replay inside the window
 harmless.
 
-**Endpoint security:** `POST /webhooks` rejects a URL unless it is `http://` or
-`https://` and its host resolves only to public addresses (no private,
-loopback, unspecified or link-local IPs). The check runs once, when the
-subscription is created: the worker doesn't re-check at delivery time, it
-follows redirects without checking them, and rows inserted directly into
-`webhook_subscriptions` skip it. Plain `http://` is accepted, so use an
-`https://` endpoint, keep the signing secret out of source control and logs, and
-rotate it if it leaks.
+**Endpoint security:** subscription URLs are checked once, when the
+subscription is created (see [Subscription Management](#subscription-management)),
+not at delivery time. Plain `http://` is accepted, so use an `https://`
+endpoint, keep the signing secret out of source control and logs, and rotate it
+if it leaks.
 
 ### Delivery Semantics
 
@@ -328,26 +325,11 @@ exponential backoff.
 
 ### Subscription Management
 
-Subscriptions are managed through the indexer API (`indexer/api/handlers_webhooks.go`).
-Every route needs a JWT from `/auth` (`Authorization: Bearer <token>`), and a
-subscription belongs to the address in the token's `sub` claim:
+Subscriptions are created, listed and deleted through the indexer's
+`/webhooks` routes; see the [API reference](./openapi/README.md). Underneath,
+two tables hold the state:
 
-- `POST /webhooks` with `{"url": "...", "event_types": ["invoice.funded"]}`
-  creates an active subscription and returns `201` with its `id` and generated
-  `secret`. This is the only response that includes the secret, so store it.
-  The URL must pass the [endpoint check](#verifying-signatures) above.
-  `event_types` must not be empty, but the names aren't validated (see the known
-  issue under [Supported Event Types](#supported-event-types)).
-- `GET /webhooks` lists your subscriptions as `{"data": [...]}`, without secrets.
-- `DELETE /webhooks/{id}` (the subscription's UUID) deletes one of your
-  subscriptions: `204`, or `404` if it isn't yours or doesn't exist.
-
-See also the [API reference](./openapi/README.md). Underneath, two tables hold
-the state:
-
-- `webhook_subscriptions`: Stores subscriber URLs, event types, secrets, owner
-  (`user_address`), and active status. There's no API for `active` yet; it's
-  changed in the database.
+- `webhook_subscriptions`: Stores subscriber URLs, event types, secrets, and active status
 - `webhook_deliveries`: Tracks delivery attempts, status, and responses.
   `locked_until` holds the current claim (see
   [Delivery Guarantees](#delivery-guarantees)) and is `NULL` when the row is
