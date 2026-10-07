@@ -238,9 +238,11 @@ What a receiver sees, per attempt:
   body are stored in `webhook_deliveries.last_response`. On failure only the
   status code (`last_status`) and an error message (`last_error`, for example
   `non-2xx response: 500`) are stored.
-- **Ordering and duplicates:** delivery is at-least-once, with no
-  de-duplication per subscription, and deliveries are not ordered. A retried
-  delivery can arrive after later events. De-duplicate on `event_id` and use
+- **Ordering and duplicates:** delivery is at-least-once, and deliveries are
+  not ordered. The queue holds at most one row per subscription and `event_id`,
+  but that row can be sent more than once (see
+  [Delivery Guarantees](#delivery-guarantees)), and a retried delivery can
+  arrive after later events. De-duplicate on `event_id` and use
   `ledger` / `occurred_at` (or the invoice's lifecycle timestamps) to order
   events.
 
@@ -258,10 +260,13 @@ What happens in the queue:
 
 ### Delivery Guarantees
 
-**Delivery is at-least-once, never exactly-once.** Subscribe idempotently and
-de-duplicate on `event_id`: a subscriber that returns 2xx slowly, an indexer
-that is killed mid-attempt, or two indexer replicas running during a rolling
-deploy can all result in the same `event_id` being delivered more than once.
+**The queue creates at most one delivery row per subscription and `event_id`,
+but HTTP delivery is at-least-once, not exactly-once.** Reprocessing the same
+on-chain event does not add another queue row for that subscription. However,
+a subscriber that returns 2xx slowly, an indexer that is killed mid-attempt, or
+two indexer replicas during a rolling deploy can cause the existing row to be
+sent more than once. Subscribers should therefore de-duplicate HTTP requests
+using `event_id`.
 
 The queue guarantees the weaker property that no delivery is lost and no two
 workers attempt the same row at the same time:
@@ -352,7 +357,3 @@ At runtime, in `indexer/main.go`:
 - **Sending:** `webhooks.NewDeliveryWorker` (`indexer/webhooks/worker.go`) runs
   as a background goroutine alongside the listener and performs every HTTP
   delivery.
-
-`indexer/webhook/dispatcher.go` also contains an older `RunWorker` delivery loop
-that is never started; removing it is tracked in
-[#879](https://github.com/TrusTrove/TrusTrove-app/issues/879).

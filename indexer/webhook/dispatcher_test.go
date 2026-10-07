@@ -2,13 +2,9 @@ package webhook
 
 import (
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
@@ -350,8 +346,8 @@ func TestDispatchQueuesPopulatedEnvelope(t *testing.T) {
 	}
 	t.Cleanup(func() {
 		if db.Pool != nil {
-			db.Pool.Exec(ctx, "DELETE FROM webhook_deliveries WHERE subscription_id = $1", sub.ID)
-			db.Pool.Exec(ctx, "DELETE FROM webhook_subscriptions WHERE id = $1", sub.ID)
+			_, _ = db.Pool.Exec(ctx, "DELETE FROM webhook_deliveries WHERE subscription_id = $1", sub.ID)
+			_, _ = db.Pool.Exec(ctx, "DELETE FROM webhook_subscriptions WHERE id = $1", sub.ID)
 		}
 	})
 
@@ -392,6 +388,50 @@ func TestDispatchQueuesPopulatedEnvelope(t *testing.T) {
 	}
 	if env.OccurredAt.Unix() != testLedgerClosedAt {
 		t.Errorf("occurred_at unix: got %d, want %d", env.OccurredAt.Unix(), testLedgerClosedAt)
+	}
+}
+
+func TestDispatchSameEventQueuesOneDeliveryPerSubscription(t *testing.T) {
+	skipIfNoDB(t)
+	ctx := context.Background()
+
+	sub := &db.WebhookSubscription{
+		TargetURL:     "https://example.invalid/webhook-916",
+		EventTypes:    []string{"fund_invoice"},
+		SigningSecret: "synthetic-secret-916",
+		Active:        true,
+	}
+	if err := db.CreateWebhookSubscription(ctx, sub); err != nil {
+		t.Fatalf("CreateWebhookSubscription: %v", err)
+	}
+	t.Cleanup(func() {
+		if db.Pool != nil {
+			_, _ = db.Pool.Exec(ctx, "DELETE FROM webhook_subscriptions WHERE id = $1", sub.ID)
+			_, _ = db.Pool.Exec(ctx, "DELETE FROM webhook_deliveries WHERE subscription_id = $1", sub.ID)
+		}
+	})
+
+	eventID := fmt.Sprintf("dispatch-916-%d", time.Now().UnixNano())
+	data := invoiceDispatchData("fund_invoice")
+	data["event_id"] = eventID
+
+	dispatcher := NewDispatcher()
+	for attempt := 0; attempt < 2; attempt++ {
+		if err := dispatcher.EnqueueDeliveries(ctx, db.Pool, "fund_invoice", data); err != nil {
+			t.Fatalf("EnqueueDeliveries attempt %d: %v", attempt+1, err)
+		}
+	}
+
+	var count int
+	if err := db.Pool.QueryRow(ctx, `
+		SELECT COUNT(*)
+		FROM webhook_deliveries
+		WHERE subscription_id = $1 AND event_id = $2
+	`, sub.ID, eventID).Scan(&count); err != nil {
+		t.Fatalf("count webhook deliveries: %v", err)
+	}
+	if count != 1 {
+		t.Fatalf("delivery count for subscription %s and event %s: got %d, want 1", sub.ID, eventID, count)
 	}
 }
 
@@ -444,10 +484,14 @@ func TestMapInternalEventType(t *testing.T) {
 		{"InvoiceDefaulted", webhooks.EventInvoiceDefaulted},
 		{"deposit", webhooks.EventPoolDeposit},
 		{"PoolDeposit", webhooks.EventPoolDeposit},
+		{"lp_deposited", webhooks.EventPoolDeposit},
 		{"withdraw", webhooks.EventPoolWithdrawal},
 		{"PoolWithdrawal", webhooks.EventPoolWithdrawal},
+		{"lp_withdrawn", webhooks.EventPoolWithdrawal},
 		{"yield_distribution", webhooks.EventPoolYieldDistributed},
 		{"PoolYieldDistributed", webhooks.EventPoolYieldDistributed},
+		{"receive_repayment", webhooks.EventPoolYieldDistributed},
+		{"repayment_received", webhooks.EventPoolYieldDistributed},
 		{"unknown_event", webhooks.EventType("unknown_event")},
 	}
 	for _, tc := range cases {
@@ -459,51 +503,7 @@ func TestMapInternalEventType(t *testing.T) {
 	}
 }
 
-// TestSign pins the HMAC-SHA256 signature format: hex-encoded, lowercase,
-// computed over "<timestamp>.<payload>". The expected digest is computed
-// independently so a regression in sign() cannot hide behind a copy-paste
-// of the same implementation.
-func TestSign(t *testing.T) {
-	secret := "test-secret"
-	ts := "1700000000"
-	payload := []byte(`{"test":true}`)
-
-	// Independent computation of the expected digest.
-	mac := hmac.New(sha256.New, []byte(secret))
-	mac.Write([]byte(ts + "."))
-	mac.Write(payload)
-	want := hex.EncodeToString(mac.Sum(nil))
-
-	got := sign(secret, ts, payload)
-	if got != want {
-		t.Errorf("sign(): got %q, want %q", got, want)
-	}
-
-	// Format checks: lowercase hex, even length, 64 chars (sha256 = 32 bytes).
-	if len(got) != 64 {
-		t.Errorf("sign() length: got %d, want 64", len(got))
-	}
-	if len(got)%2 != 0 {
-		t.Errorf("sign() length %d is odd; hex encoding must be even", len(got))
-	}
-	if got != strings.ToLower(got) {
-		t.Errorf("sign() is not lowercase hex: %q", got)
-	}
-	if _, err := hex.DecodeString(got); err != nil {
-		t.Errorf("sign() is not valid hex: %v", err)
-	}
-
-	// Different secrets must produce different signatures.
-	sig1 := sign("secret-a", ts, payload)
-	sig2 := sign("secret-b", ts, payload)
-	if sig1 == sig2 {
-		t.Errorf("different secrets produced the same signature: %q", sig1)
-	}
-
-	// Different timestamps must produce different signatures (replay protection).
-	sigTS1 := sign(secret, "1700000000", payload)
-	sigTS2 := sign(secret, "1700000001", payload)
-	if sigTS1 == sigTS2 {
-		t.Errorf("different timestamps produced the same signature: %q", sigTS1)
-	}
-}
+// The signature-format test that used to live here (TestSign) covered the
+// copy of sign() this package carried for its never-called delivery loop.
+// Signature coverage now lives in webhooks.TestSignFormat, next to the only
+// remaining implementation of sign() (issue #879).

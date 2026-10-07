@@ -102,7 +102,7 @@ func getProtocolStats(ctx context.Context, q Querier) (*ProtocolStats, error) {
 // statements, or against a pgx.Tx when several statements must commit or
 // roll back together (see db.WithTx and the listener's event handling).
 
-func InsertInvoice(ctx context.Context, q Querier, inv *DbInvoice) error {
+func InsertInvoice(ctx context.Context, q Querier, inv *DbInvoice) (bool, error) {
 	query := `
 		INSERT INTO invoices (
 			id, issuer, buyer, face_value, discount_bps, funded_amount, due_date, status, created_at,
@@ -113,6 +113,7 @@ func InsertInvoice(ctx context.Context, q Querier, inv *DbInvoice) error {
 			@funded_at, @shipped_at, @issuer_confirmed, @buyer_confirmed, @buyer_confirmed_at, @repaid_at,
 			@attestation_agent_id, @risk_score_bps, @evidence_hash, @attested_at
 		)
+		ON CONFLICT (id) DO NOTHING
 	`
 	args := pgx.NamedArgs{
 		"id":                   inv.ID,
@@ -135,11 +136,11 @@ func InsertInvoice(ctx context.Context, q Querier, inv *DbInvoice) error {
 		"evidence_hash":        inv.EvidenceHash,
 		"attested_at":          inv.AttestedAt,
 	}
-	_, err := q.Exec(ctx, query, args)
+	tag, err := q.Exec(ctx, query, args)
 	if err != nil {
-		return fmt.Errorf("queries: insert invoice: %w", err)
+		return false, fmt.Errorf("queries: insert invoice: %w", err)
 	}
-	return nil
+	return tag.RowsAffected() > 0, nil
 }
 
 func GetInvoiceByID(ctx context.Context, q Querier, id string) (*DbInvoice, error) {
@@ -197,7 +198,7 @@ func GetInvoicesPage(ctx context.Context, status, issuer string, limit, offset i
 			funded_at, shipped_at, issuer_confirmed, buyer_confirmed, buyer_confirmed_at, repaid_at,
 			attestation_agent_id, risk_score_bps, evidence_hash, attested_at
 		FROM invoices%s
-		ORDER BY created_at DESC
+		ORDER BY created_at DESC, id DESC
 		LIMIT $%d OFFSET $%d
 	`, whereClause, limitPlaceholder, offsetPlaceholder)
 	queryArgs := append(append([]any{}, filterArgs...), limit, offset)
@@ -220,6 +221,9 @@ func GetInvoicesPage(ctx context.Context, status, issuer string, limit, offset i
 			return nil, 0, fmt.Errorf("queries: scan invoice: %w", err)
 		}
 		invoices = append(invoices, &inv)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, 0, fmt.Errorf("queries: iterate invoices: %w", err)
 	}
 	return invoices, total, nil
 }
@@ -501,7 +505,7 @@ func GetRecentEvents(ctx context.Context, limit int) ([]*EventLog, error) {
 	query := `
 		SELECT id, event_id, contract_id, ledger, ledger_closed_at, event_type, data
 		FROM events_log
-		ORDER BY ledger_closed_at DESC
+		ORDER BY ledger_closed_at DESC, id DESC
 		LIMIT $1
 	`
 	rows, err := Pool.Query(ctx, query, limit)
@@ -518,6 +522,9 @@ func GetRecentEvents(ctx context.Context, limit int) ([]*EventLog, error) {
 			return nil, fmt.Errorf("queries: scan event: %w", err)
 		}
 		events = append(events, &ev)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("queries: iterate events: %w", err)
 	}
 	return events, nil
 }

@@ -29,6 +29,9 @@ vi.mock("@/hooks/useWallet", () => {
 
 vi.mock("@/lib/freighter", () => ({
   isFreighterInstalled: vi.fn().mockResolvedValue(true),
+  // Issue #873's post-connect watcher; a no-op stop function keeps these
+  // render tests focused on WalletConnect's own UI.
+  watchFreighterChanges: vi.fn(() => () => {}),
   FreighterError: class FreighterError extends Error {
     readonly code: string;
     constructor(code: string, message: string) {
