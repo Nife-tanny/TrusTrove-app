@@ -11,7 +11,21 @@ import { useWalletStore } from "@/store/wallet";
 import { useBalances } from "@/hooks/useBalances";
 import { useProfile } from "@/hooks/useProfile";
 import { useNotifications } from "@/hooks/useNotifications";
-import { Wallet, Shield, Terminal, ExternalLink, Menu, X, Settings, LayoutDashboard, Factory, BarChart3, BarChart2, User, Compass } from "lucide-react";
+import {
+  Wallet,
+  Shield,
+  Terminal,
+  ExternalLink,
+  Menu,
+  X,
+  Settings,
+  LayoutDashboard,
+  Factory,
+  BarChart3,
+  BarChart2,
+  User,
+  Compass,
+} from "lucide-react";
 import { NotificationBell } from "./NotificationBell";
 import { OnboardingTour } from "./OnboardingTour";
 import { useOnboardingStore } from "@/store/onboarding";

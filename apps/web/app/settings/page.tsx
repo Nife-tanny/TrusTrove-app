@@ -9,9 +9,9 @@ import { Shield, Bell, Database, Palette, Monitor, Layers } from "lucide-react";
 export default function SettingsPage() {
   const connected = useWalletStore((s) => s.connected);
   const address = useWalletStore((s) => s.address);
-  const [displayDensity, setDisplayDensity] = useState<"comfortable" | "compact">(
-    "comfortable",
-  );
+  const [displayDensity, setDisplayDensity] = useState<
+    "comfortable" | "compact"
+  >("comfortable");
   const [animationsEnabled, setAnimationsEnabled] = useState(true);
   const [reducedMotion, setReducedMotion] = useState(false);
 
@@ -62,202 +62,202 @@ export default function SettingsPage() {
   }, [reducedMotion]);
 
   function AppearanceSection() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <h4 className="text-sm font-bold font-mono uppercase text-white mb-3 flex items-center gap-2">
-          <Palette className="w-4 h-4 text-primary" />
-          Theme
-        </h4>
-        <p className="text-slate-500 text-xs font-mono mb-3">
-          Choose your preferred color scheme. System preference follows
-          your OS setting.
-        </p>
-        <ThemeToggle />
-      </div>
+    return (
+      <div className="space-y-6">
+        <div>
+          <h4 className="text-sm font-bold font-mono uppercase text-white mb-3 flex items-center gap-2">
+            <Palette className="w-4 h-4 text-primary" />
+            Theme
+          </h4>
+          <p className="text-slate-500 text-xs font-mono mb-3">
+            Choose your preferred color scheme. System preference follows your
+            OS setting.
+          </p>
+          <ThemeToggle />
+        </div>
 
-      <div className="border-t border-border/40 pt-6">
-        <h4 className="text-sm font-bold font-mono uppercase text-white mb-3 flex items-center gap-2">
-          <Monitor className="w-4 h-4 text-primary" />
-          Display Density
-        </h4>
-        <p className="text-slate-500 text-xs font-mono mb-3">
-          Adjust the spacing and size of UI elements.
-        </p>
-        <div className="flex gap-4">
-          {(["comfortable", "compact"] as const).map((density) => (
-            <label
-              key={density}
-              className={`flex-1 p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                displayDensity === density
-                  ? "border-primary bg-primary/10"
-                  : "border-border hover:border-primary/40"
-              }`}
-            >
-              <input
-                type="radio"
-                name="density"
-                value={density}
-                checked={displayDensity === density}
-                onChange={() => setDisplayDensity(density)}
-                className="sr-only"
-              />
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-12 h-8 rounded border border-border/40 ${
-                    density === "compact" ? "bg-slate-800" : "bg-slate-900"
-                  }`}
-                >
+        <div className="border-t border-border/40 pt-6">
+          <h4 className="text-sm font-bold font-mono uppercase text-white mb-3 flex items-center gap-2">
+            <Monitor className="w-4 h-4 text-primary" />
+            Display Density
+          </h4>
+          <p className="text-slate-500 text-xs font-mono mb-3">
+            Adjust the spacing and size of UI elements.
+          </p>
+          <div className="flex gap-4">
+            {(["comfortable", "compact"] as const).map((density) => (
+              <label
+                key={density}
+                className={`flex-1 p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                  displayDensity === density
+                    ? "border-primary bg-primary/10"
+                    : "border-border hover:border-primary/40"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="density"
+                  value={density}
+                  checked={displayDensity === density}
+                  onChange={() => setDisplayDensity(density)}
+                  className="sr-only"
+                />
+                <div className="flex items-center gap-3">
                   <div
-                    className={`h-3 w-3/4 rounded bg-primary/20 ${
-                      density === "compact" ? "mt-1 ml-1" : "mt-1.5 ml-1.5"
+                    className={`w-12 h-8 rounded border border-border/40 ${
+                      density === "compact" ? "bg-slate-800" : "bg-slate-900"
                     }`}
-                  />
-                  <div
-                    className={`h-1.5 w-full rounded bg-slate-700 ${
-                      density === "compact" ? "mt-1 ml-1" : "mt-1.5 ml-1.5"
-                    }`}
-                  />
-                  <div
-                    className={`h-1.5 w-2/3 rounded bg-slate-700 ${
-                      density === "compact" ? "mt-0.5 ml-1" : "mt-1 ml-1.5"
-                    }`}
-                  />
+                  >
+                    <div
+                      className={`h-3 w-3/4 rounded bg-primary/20 ${
+                        density === "compact" ? "mt-1 ml-1" : "mt-1.5 ml-1.5"
+                      }`}
+                    />
+                    <div
+                      className={`h-1.5 w-full rounded bg-slate-700 ${
+                        density === "compact" ? "mt-1 ml-1" : "mt-1.5 ml-1.5"
+                      }`}
+                    />
+                    <div
+                      className={`h-1.5 w-2/3 rounded bg-slate-700 ${
+                        density === "compact" ? "mt-0.5 ml-1" : "mt-1 ml-1.5"
+                      }`}
+                    />
+                  </div>
+                  <span className="font-mono text-xs font-bold text-white capitalize">
+                    {density}
+                  </span>
                 </div>
-                <span className="font-mono text-xs font-bold text-white capitalize">
-                  {density}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="border-t border-border/40 pt-6">
+          <h4 className="text-sm font-bold font-mono uppercase text-white mb-3 flex items-center gap-2">
+            <Layers className="w-4 h-4 text-primary" />
+            Motion & Animation
+          </h4>
+          <p className="text-slate-500 text-xs font-mono mb-3">
+            Control UI animations and transitions.
+          </p>
+          <div className="space-y-3">
+            <label className="flex items-center justify-between p-3 rounded-lg border border-border bg-card">
+              <div>
+                <span className="font-mono text-xs font-bold text-white block">
+                  UI Animations
+                </span>
+                <span className="text-slate-500 text-[10px] block mt-0.5">
+                  Enable transitions, hover effects, and micro-interactions
                 </span>
               </div>
+              <input
+                type="checkbox"
+                checked={animationsEnabled}
+                onChange={(e) => setAnimationsEnabled(e.target.checked)}
+                className="w-5 h-5 accent-primary cursor-pointer"
+              />
             </label>
-          ))}
+            <label className="flex items-center justify-between p-3 rounded-lg border border-border bg-card">
+              <div>
+                <span className="font-mono text-xs font-bold text-white block">
+                  Reduced Motion
+                </span>
+                <span className="text-slate-500 text-[10px] block mt-0.5">
+                  Minimize non-essential motion (respects OS preference)
+                </span>
+              </div>
+              <input
+                type="checkbox"
+                checked={reducedMotion}
+                onChange={(e) => setReducedMotion(e.target.checked)}
+                className="w-5 h-5 accent-primary cursor-pointer"
+              />
+            </label>
+          </div>
         </div>
       </div>
+    );
+  }
 
-      <div className="border-t border-border/40 pt-6">
-        <h4 className="text-sm font-bold font-mono uppercase text-white mb-3 flex items-center gap-2">
-          <Layers className="w-4 h-4 text-primary" />
-          Motion & Animation
-        </h4>
-        <p className="text-slate-500 text-xs font-mono mb-3">
-          Control UI animations and transitions.
+  function NotificationsSection() {
+    return (
+      <div className="space-y-4">
+        <p className="text-slate-500 text-xs font-mono">
+          Notification preferences are managed per connected wallet address.
+          {connected
+            ? ` Currently configured for ${address?.slice(0, 6)}...${address?.slice(-4)}.`
+            : " Connect a wallet to manage notification preferences."}
         </p>
-        <div className="space-y-3">
-          <label className="flex items-center justify-between p-3 rounded-lg border border-border bg-card">
-            <div>
-              <span className="font-mono text-xs font-bold text-white block">
-                UI Animations
-              </span>
-              <span className="text-slate-500 text-[10px] block mt-0.5">
-                Enable transitions, hover effects, and micro-interactions
-              </span>
-            </div>
-            <input
-              type="checkbox"
-              checked={animationsEnabled}
-              onChange={(e) => setAnimationsEnabled(e.target.checked)}
-              className="w-5 h-5 accent-primary cursor-pointer"
-            />
-          </label>
-          <label className="flex items-center justify-between p-3 rounded-lg border border-border bg-card">
-            <div>
-              <span className="font-mono text-xs font-bold text-white block">
-                Reduced Motion
-              </span>
-              <span className="text-slate-500 text-[10px] block mt-0.5">
-                Minimize non-essential motion (respects OS preference)
-              </span>
-            </div>
-            <input
-              type="checkbox"
-              checked={reducedMotion}
-              onChange={(e) => setReducedMotion(e.target.checked)}
-              className="w-5 h-5 accent-primary cursor-pointer"
-            />
-          </label>
-        </div>
+        {connected && address && <NotificationPreferences address={address} />}
+        {!connected && (
+          <div className="bg-card border border-border rounded-lg p-6 text-center">
+            <Bell className="w-12 h-12 text-slate-500 mx-auto mb-3" />
+            <p className="text-slate-400 text-xs font-mono">
+              Connect your wallet to configure notification preferences
+            </p>
+          </div>
+        )}
       </div>
-    </div>
-  );
-}
+    );
+  }
 
-function NotificationsSection() {
-  return (
-    <div className="space-y-4">
-      <p className="text-slate-500 text-xs font-mono">
-        Notification preferences are managed per connected wallet address.
-        {connected
-          ? ` Currently configured for ${address?.slice(0, 6)}...${address?.slice(-4)}.`
-          : " Connect a wallet to manage notification preferences."}
-      </p>
-      {connected && address && <NotificationPreferences address={address} />}
-      {!connected && (
-        <div className="bg-card border border-border rounded-lg p-6 text-center">
-          <Bell className="w-12 h-12 text-slate-500 mx-auto mb-3" />
-          <p className="text-slate-400 text-xs font-mono">
-            Connect your wallet to configure notification preferences
+  function DataPrivacySection() {
+    return (
+      <div className="space-y-6">
+        <div className="bg-card border border-border rounded-lg p-4">
+          <h4 className="text-sm font-bold font-mono uppercase text-white mb-2 flex items-center gap-2">
+            <Shield className="w-4 h-4 text-primary" />
+            Local Storage
+          </h4>
+          <p className="text-slate-500 text-xs font-mono mb-4">
+            TrusTrove stores preferences locally in your browser. No personal
+            data is sent to external servers without your consent.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              if (
+                confirm(
+                  "This will clear all locally stored preferences (theme, filters, saved searches, display settings). This cannot be undone.",
+                )
+              ) {
+                try {
+                  Object.keys(window.localStorage).forEach((key) => {
+                    if (key.startsWith("trusttrove:")) {
+                      window.localStorage.removeItem(key);
+                    }
+                  });
+                  alert("Local data cleared. Page will reload.");
+                  window.location.reload();
+                } catch {
+                  alert("Failed to clear local data.");
+                }
+              }
+            }}
+            className="px-4 py-2 border border-red-500/40 text-red-400 rounded hover:bg-red-500/10 font-mono text-xs uppercase transition-colors"
+          >
+            Clear All Local Data
+          </button>
+        </div>
+
+        <div className="bg-card border border-border rounded-lg p-4">
+          <h4 className="text-sm font-bold font-mono uppercase text-white mb-2 flex items-center gap-2">
+            <Database className="w-4 h-4 text-primary" />
+            Saved Marketplace Searches
+          </h4>
+          <p className="text-slate-500 text-xs font-mono mb-4">
+            Your saved filter presets are stored locally and scoped to your
+            connected wallet address (or a generic key when not connected).
+            Maximum of 10 presets per address.
+          </p>
+          <p className="text-slate-400 text-[10px] font-mono">
+            Manage presets from the <strong>Marketplace</strong> page.
           </p>
         </div>
-      )}
-    </div>
-  );
-}
-
-function DataPrivacySection() {
-  return (
-    <div className="space-y-6">
-      <div className="bg-card border border-border rounded-lg p-4">
-        <h4 className="text-sm font-bold font-mono uppercase text-white mb-2 flex items-center gap-2">
-          <Shield className="w-4 h-4 text-primary" />
-          Local Storage
-        </h4>
-        <p className="text-slate-500 text-xs font-mono mb-4">
-          TrusTrove stores preferences locally in your browser. No personal
-          data is sent to external servers without your consent.
-        </p>
-        <button
-          type="button"
-          onClick={() => {
-            if (
-              confirm(
-                "This will clear all locally stored preferences (theme, filters, saved searches, display settings). This cannot be undone.",
-              )
-            ) {
-              try {
-                Object.keys(window.localStorage).forEach((key) => {
-                  if (key.startsWith("trusttrove:")) {
-                    window.localStorage.removeItem(key);
-                  }
-                });
-                alert("Local data cleared. Page will reload.");
-                window.location.reload();
-              } catch {
-                alert("Failed to clear local data.");
-              }
-            }
-          }}
-          className="px-4 py-2 border border-red-500/40 text-red-400 rounded hover:bg-red-500/10 font-mono text-xs uppercase transition-colors"
-        >
-          Clear All Local Data
-        </button>
       </div>
-
-      <div className="bg-card border border-border rounded-lg p-4">
-        <h4 className="text-sm font-bold font-mono uppercase text-white mb-2 flex items-center gap-2">
-          <Database className="w-4 h-4 text-primary" />
-          Saved Marketplace Searches
-        </h4>
-        <p className="text-slate-500 text-xs font-mono mb-4">
-          Your saved filter presets are stored locally and scoped to your
-          connected wallet address (or a generic key when not connected).
-          Maximum of 10 presets per address.
-        </p>
-        <p className="text-slate-400 text-[10px] font-mono">
-          Manage presets from the <strong>Marketplace</strong> page.
-        </p>
-      </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
     <PageLayout>

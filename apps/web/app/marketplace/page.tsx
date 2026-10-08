@@ -49,7 +49,10 @@ function readFiltersFromStorage(): MarketplaceFilters | null {
 
 function writeFiltersToStorage(filters: MarketplaceFilters): void {
   try {
-    window.localStorage.setItem(MARKETPLACE_FILTERS_KEY, JSON.stringify(filters));
+    window.localStorage.setItem(
+      MARKETPLACE_FILTERS_KEY,
+      JSON.stringify(filters),
+    );
   } catch {
     // Storage disabled — in-memory state still applies for this session.
   }
@@ -57,7 +60,9 @@ function writeFiltersToStorage(filters: MarketplaceFilters): void {
 
 function readPresetsFromStorage(address?: string): FilterPreset[] {
   try {
-    const key = address ? `${MARKETPLACE_PRESETS_KEY}_${address}` : MARKETPLACE_PRESETS_KEY;
+    const key = address
+      ? `${MARKETPLACE_PRESETS_KEY}_${address}`
+      : MARKETPLACE_PRESETS_KEY;
     const stored = window.localStorage.getItem(key);
     if (!stored) return [];
     const parsed = JSON.parse(stored);
@@ -67,9 +72,14 @@ function readPresetsFromStorage(address?: string): FilterPreset[] {
   }
 }
 
-function writePresetsToStorage(presets: FilterPreset[], address?: string): void {
+function writePresetsToStorage(
+  presets: FilterPreset[],
+  address?: string,
+): void {
   try {
-    const key = address ? `${MARKETPLACE_PRESETS_KEY}_${address}` : MARKETPLACE_PRESETS_KEY;
+    const key = address
+      ? `${MARKETPLACE_PRESETS_KEY}_${address}`
+      : MARKETPLACE_PRESETS_KEY;
     window.localStorage.setItem(key, JSON.stringify(presets));
   } catch {
     // Storage disabled
@@ -243,7 +253,10 @@ export default function Marketplace() {
 
   // Get selected invoices for comparison
   const selectedInvoices = useMemo(
-    () => filteredAndSortedInvoices.filter((inv) => selectedInvoiceIds.includes(inv.id)),
+    () =>
+      filteredAndSortedInvoices.filter((inv) =>
+        selectedInvoiceIds.includes(inv.id),
+      ),
     [filteredAndSortedInvoices, selectedInvoiceIds],
   );
 
@@ -451,16 +464,24 @@ export default function Marketplace() {
                                 type="text"
                                 className="flex-1 bg-[#080c10] border border-primary rounded px-2 py-1 text-white focus:outline-none text-[11px]"
                                 value={editingPresetName}
-                                onChange={(e) => setEditingPresetName(e.target.value)}
-                                onKeyDown={(e) =>
-                                  e.key === "Enter" ? saveEditedPreset(index.toString()) : undefined
+                                onChange={(e) =>
+                                  setEditingPresetName(e.target.value)
                                 }
-                                onBlur={() => saveEditedPreset(index.toString())}
+                                onKeyDown={(e) =>
+                                  e.key === "Enter"
+                                    ? saveEditedPreset(index.toString())
+                                    : undefined
+                                }
+                                onBlur={() =>
+                                  saveEditedPreset(index.toString())
+                                }
                                 autoFocus
                               />
                               <button
                                 type="button"
-                                onClick={() => saveEditedPreset(index.toString())}
+                                onClick={() =>
+                                  saveEditedPreset(index.toString())
+                                }
                                 className="px-2 py-1 text-primary hover:underline text-[10px]"
                               >
                                 Save
@@ -477,10 +498,12 @@ export default function Marketplace() {
                               >
                                 <span className="font-bold">{preset.name}</span>
                                 <span className="text-slate-500 text-[9px]">
-                                  ({preset.filters.statusFilter}{", "}
-                                  {preset.filters.minAmount || "0"}{"-"}
-                                  {preset.filters.maxAmount || "∞"}{" "}
-                                  ≤{Number(preset.filters.maxDiscount) / 100}%)
+                                  ({preset.filters.statusFilter}
+                                  {", "}
+                                  {preset.filters.minAmount || "0"}
+                                  {"-"}
+                                  {preset.filters.maxAmount || "∞"} ≤
+                                  {Number(preset.filters.maxDiscount) / 100}%)
                                 </span>
                               </button>
                               <div className="flex items-center gap-1">
@@ -488,7 +511,10 @@ export default function Marketplace() {
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    startEditingPreset(index.toString(), preset.name);
+                                    startEditingPreset(
+                                      index.toString(),
+                                      preset.name,
+                                    );
                                   }}
                                   className="p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors"
                                   aria-label="Rename preset"

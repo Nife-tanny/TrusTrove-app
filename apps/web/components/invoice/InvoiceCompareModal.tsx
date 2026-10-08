@@ -20,9 +20,7 @@ const COMPARISON_FIELDS: Array<{
     key: "id",
     label: "Invoice ID",
     render: (inv) => (
-      <code className="font-mono text-xs text-primary break-all">
-        {inv.id}
-      </code>
+      <code className="font-mono text-xs text-primary break-all">{inv.id}</code>
     ),
   },
   {
@@ -100,9 +98,7 @@ const COMPARISON_FIELDS: Array<{
   {
     key: "status",
     label: "Status",
-    render: (inv) => (
-      <InvoiceStatusBadge status={inv.status} />
-    ),
+    render: (inv) => <InvoiceStatusBadge status={inv.status} />,
   },
 ];
 
@@ -136,7 +132,10 @@ function InvoiceStatusBadge({ status }: { status: Invoice["status"] }) {
   );
 }
 
-export function InvoiceCompareModal({ invoices, onClose }: InvoiceCompareModalProps) {
+export function InvoiceCompareModal({
+  invoices,
+  onClose,
+}: InvoiceCompareModalProps) {
   const modalRef = useFocusTrap<HTMLDivElement>(true, onClose);
   const [scrollOffset, setScrollOffset] = React.useState(0);
   const maxScroll = Math.max(0, invoices.length - 4);
@@ -168,7 +167,10 @@ export function InvoiceCompareModal({ invoices, onClose }: InvoiceCompareModalPr
       >
         {/* Header */}
         <div className="border-b border-border/40 px-6 py-4 flex items-center justify-between">
-          <h2 id="compare-modal-title" className="text-lg font-bold font-mono tracking-wider uppercase text-white">
+          <h2
+            id="compare-modal-title"
+            className="text-lg font-bold font-mono tracking-wider uppercase text-white"
+          >
             Invoice Comparison
           </h2>
           <button
@@ -247,12 +249,15 @@ export function InvoiceCompareModal({ invoices, onClose }: InvoiceCompareModalPr
                 <ChevronLeft className="w-4 h-4 text-white" />
               </button>
               <span className="text-slate-500 text-[10px] font-mono">
-                Showing {scrollOffset + 1}–{Math.min(scrollOffset + 4, invoices.length)} of{" "}
+                Showing {scrollOffset + 1}–
+                {Math.min(scrollOffset + 4, invoices.length)} of{" "}
                 {invoices.length}
               </span>
               <button
                 type="button"
-                onClick={() => setScrollOffset((prev) => Math.min(maxScroll, prev + 1))}
+                onClick={() =>
+                  setScrollOffset((prev) => Math.min(maxScroll, prev + 1))
+                }
                 disabled={scrollOffset >= maxScroll}
                 className="p-2 bg-[#0d131a] border border-border rounded hover:border-primary/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 aria-label="Show next invoice"
