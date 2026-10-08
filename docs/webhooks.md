@@ -35,6 +35,30 @@ All webhook deliveries use a versioned envelope:
 }
 ```
 
+#### Where each field comes from
+
+Envelope fields are on-chain facts taken from the event that triggered the
+delivery, not from the moment the worker sent it:
+
+- `event_id`, `ledger` and `contract_id` come from the Soroban event itself, so
+  a re-indexed historical event keeps its original identity.
+- `occurred_at` is the **ledger close time** of that ledger, never the indexer's
+  wall clock. A delivery retried an hour later, or an event replayed after a
+  resync, still reports when it happened on-chain.
+
+`data` is read back from the invoice row the listener just updated, so it
+reflects post-transaction state rather than what happened to be in the event
+arguments:
+
+- Invoice events (`invoice.*`) carry `invoice_id`, `issuer`, `buyer`,
+  `face_value`, `discount_bps`, `funded_amount`, `due_date`, `status`,
+  `created_at` and the lifecycle timestamps `funded_at`, `shipped_at`,
+  `buyer_confirmed_at`, `repaid_at`.
+- Lifecycle timestamps that have not happened yet are **absent** from the
+  payload, not zero. Treat a missing key as "not reached".
+- Pool events (`pool.*`) carry `account`, `amount` and, when the contract
+  reports them, `shares`, `new_balance`, `yield_amount` and `total_shares`.
+
 ### Supported Event Types
 
 | Event Type               | Description                  |
@@ -61,6 +85,47 @@ X-TrusTrove-Timestamp: <unix_timestamp>
 
 The signature is computed as `HMAC_SHA256(secret, timestamp + "." + payload)`.
 
+### Delivery Guarantees
+
+**The queue creates at most one delivery row per subscription and `event_id`,
+but HTTP delivery is at-least-once, not exactly-once.** Reprocessing the same
+on-chain event does not add another queue row for that subscription. However,
+a subscriber that returns 2xx slowly, an indexer that is killed mid-attempt, or
+two indexer replicas during a rolling deploy can cause the existing row to be
+sent more than once. Subscribers should therefore de-duplicate HTTP requests
+using `event_id`.
+
+The queue guarantees the weaker property that no delivery is lost and no two
+workers attempt the same row at the same time:
+
+- `db.GetPendingDeliveries` **claims** rows instead of merely reading them. The
+  read is a single statement that locks the candidate rows with
+  `SELECT … FOR UPDATE SKIP LOCKED` and stamps `locked_until`, so a concurrent
+  claim by another worker (or another replica of the same indexer) gets a
+  disjoint batch.
+- A claimed row is invisible to other workers until either the attempt records
+  an outcome (`MarkDeliverySuccess`, `MarkDeliveryRetry` and
+  `MarkDeliveryDeadLetter` all clear `locked_until`) or the lock expires.
+- If a worker dies after claiming and before recording an outcome, the row
+  stays `pending` and becomes claimable again once `locked_until` passes. That
+  is the case in which a subscriber may see an event twice.
+- Rows are never deleted on success; they move to `delivered`, so the queue can
+  be audited.
+
+### Worker Configuration
+
+The delivery worker attempts a batch of deliveries from a bounded pool that
+shares a single `http.Client`, so TCP/TLS connections are reused across
+deliveries instead of paying a handshake per POST. Environment variables read
+by `indexer/config`:
+
+- `WEBHOOK_WORKER_CONCURRENCY` (default `8`): how many deliveries one batch
+  attempts in parallel. Keep it small when your subscribers rate-limit inbound
+  traffic. Non-positive values fall back to the default.
+- The claim lock TTL is `db.DefaultClaimLockTTL` (60s) and must stay comfortably
+  above the worker's HTTP timeout so an in-flight attempt is never handed to a
+  second worker.
+
 ### Retry Logic
 
 Failed deliveries are retried with exponential backoff:
@@ -76,7 +141,10 @@ Failed deliveries are retried with exponential backoff:
 Webhook subscriptions are managed via the database. Use the following tables:
 
 - `webhook_subscriptions`: Stores subscriber URLs, event types, secrets, and active status
-- `webhook_deliveries`: Tracks delivery attempts, status, and responses
+- `webhook_deliveries`: Tracks delivery attempts, status, and responses.
+  `locked_until` holds the current claim (see
+  [Delivery Guarantees](#delivery-guarantees)) and is `NULL` when the row is
+  free; migration `010_add_webhook_delivery_locking.sql` added the column.
 
 ## Implementation Details
 
