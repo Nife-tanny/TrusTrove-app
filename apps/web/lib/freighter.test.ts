@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   isFreighterInstalled,
   connectFreighter,
   getFreighterPublicKey,
+  watchFreighterChanges,
   FreighterError,
 } from "./freighter";
 
@@ -10,17 +11,20 @@ vi.mock("@stellar/freighter-api", () => ({
   isConnected: vi.fn(),
   requestAccess: vi.fn(),
   getPublicKey: vi.fn(),
+  getNetworkDetails: vi.fn(),
 }));
 
 import {
   isConnected,
   requestAccess,
   getPublicKey,
+  getNetworkDetails,
 } from "@stellar/freighter-api";
 
 const mockIsConnected = vi.mocked(isConnected);
 const mockRequestAccess = vi.mocked(requestAccess);
 const mockGetPublicKey = vi.mocked(getPublicKey);
+const mockGetNetworkDetails = vi.mocked(getNetworkDetails);
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -130,6 +134,127 @@ describe("connectFreighter", () => {
       expect(err).toBeInstanceOf(FreighterError);
       expect((err as FreighterError).code).toBe("unknown");
     }
+  });
+});
+
+describe("watchFreighterChanges", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const setFreighterState = (address: string, network: string) => {
+    mockGetPublicKey.mockResolvedValue(address);
+    mockGetNetworkDetails.mockResolvedValue({ network } as any);
+  };
+
+  it("does not report anything while Freighter matches the baseline", async () => {
+    setFreighterState("G12345", "TESTNET");
+    const onChange = vi.fn();
+
+    const stop = watchFreighterChanges(
+      { address: "G12345", network: "testnet" },
+      onChange,
+      { intervalMs: 100 },
+    );
+    await vi.advanceTimersByTimeAsync(500);
+    stop();
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(mockGetPublicKey).toHaveBeenCalled();
+    expect(mockGetNetworkDetails).toHaveBeenCalled();
+  });
+
+  it("reports a changed address with the snapshot it started from", async () => {
+    setFreighterState("G12345", "TESTNET");
+    const onChange = vi.fn();
+
+    const stop = watchFreighterChanges(
+      { address: "G12345", network: "testnet" },
+      onChange,
+      { intervalMs: 100 },
+    );
+    await vi.advanceTimersByTimeAsync(0);
+    expect(onChange).not.toHaveBeenCalled();
+
+    setFreighterState("GCHANGED", "TESTNET");
+    await vi.advanceTimersByTimeAsync(100);
+    stop();
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith({
+      address: "GCHANGED",
+      previous: { address: "G12345", network: "testnet" },
+    });
+  });
+
+  it("reports a network change normalized to lower case", async () => {
+    setFreighterState("G12345", "PUBLIC");
+    const onChange = vi.fn();
+
+    const stop = watchFreighterChanges(
+      { address: "G12345", network: "testnet" },
+      onChange,
+      { intervalMs: 100 },
+    );
+    await vi.advanceTimersByTimeAsync(100);
+    stop();
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith({
+      network: "public",
+      previous: { address: "G12345", network: "testnet" },
+    });
+  });
+
+  it("routes poll failures to onError and keeps polling", async () => {
+    setFreighterState("G12345", "TESTNET");
+    mockGetPublicKey.mockRejectedValueOnce(new Error("extension locked"));
+    const onChange = vi.fn();
+    const onError = vi.fn();
+
+    const stop = watchFreighterChanges(
+      { address: "G12345", network: "testnet" },
+      onChange,
+      { intervalMs: 100, onError },
+    );
+    await vi.advanceTimersByTimeAsync(0);
+    expect(onError).toHaveBeenCalledTimes(1);
+    expect(onChange).not.toHaveBeenCalled();
+
+    // The failure must not stop the watcher: a later poll still detects diffs.
+    setFreighterState("GCHANGED", "TESTNET");
+    await vi.advanceTimersByTimeAsync(100);
+    stop();
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ address: "GCHANGED" }),
+    );
+  });
+
+  it("stops polling and stays silent after the returned stop function runs", async () => {
+    setFreighterState("G12345", "TESTNET");
+    const onChange = vi.fn();
+
+    const stop = watchFreighterChanges(
+      { address: "G12345", network: "testnet" },
+      onChange,
+      { intervalMs: 100 },
+    );
+    await vi.advanceTimersByTimeAsync(0);
+    const callsBeforeStop = mockGetPublicKey.mock.calls.length;
+
+    stop();
+    setFreighterState("GCHANGED", "TESTNET");
+    await vi.advanceTimersByTimeAsync(1000);
+
+    expect(mockGetPublicKey.mock.calls.length).toBe(callsBeforeStop);
+    expect(onChange).not.toHaveBeenCalled();
   });
 });
 

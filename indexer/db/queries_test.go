@@ -14,7 +14,7 @@ import (
 func skipIfNoDB(t *testing.T) {
 	t.Helper()
 	if os.Getenv("TEST_DATABASE_URL") == "" {
-		t.Skip("TEST_DATABASE_URL not set — skipping DB integration test")
+		t.Skip("TEST_DATABASE_URL not set â€” skipping DB integration test")
 	}
 }
 
@@ -47,12 +47,12 @@ func TestInsertAndGetInvoice(t *testing.T) {
 		CreatedAt:    time.Now().Unix(),
 	}
 
-	if err := InsertInvoice(ctx, Pool, inv); err != nil {
+	if _, err := InsertInvoice(ctx, Pool, inv); err != nil {
 		t.Fatalf("InsertInvoice: %v", err)
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
-			Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
 		}
 	})
 
@@ -71,6 +71,44 @@ func TestInsertAndGetInvoice(t *testing.T) {
 	}
 	if got.FaceValue != inv.FaceValue {
 		t.Errorf("GetInvoiceByID: got FaceValue %q, want %q", got.FaceValue, inv.FaceValue)
+	}
+}
+
+func TestInsertInvoiceDuplicateIsIgnored(t *testing.T) {
+	skipIfNoDB(t)
+
+	ctx := context.Background()
+	id := fmt.Sprintf("duplicate-test%d", time.Now().UnixNano())
+	inv := newTestInvoice(id)
+
+	inserted, err := InsertInvoice(ctx, Pool, inv)
+	if err != nil {
+		t.Fatalf("first InsertInvoice: %v", err)
+	}
+	if !inserted {
+		t.Fatal("first InsertInvoice: got inserted=false, want true")
+	}
+
+	t.Cleanup(func() {
+		if Pool != nil {
+			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+		}
+	})
+
+	inserted, err = InsertInvoice(ctx, Pool, inv)
+	if err != nil {
+		t.Fatalf("duplicate InsertInvoice: %v", err)
+	}
+	if inserted {
+		t.Fatal("duplicate InsertInvoice: got inserted=true, want false")
+	}
+
+	var count int
+	if err := Pool.QueryRow(ctx, "SELECT COUNT(*) FROM invoices WHERE id = $1", id).Scan(&count); err != nil {
+		t.Fatalf("count inserted invoices: %v", err)
+	}
+	if count != 1 {
+		t.Errorf("invoice row count: got %d, want 1", count)
 	}
 }
 
@@ -107,14 +145,14 @@ func TestGetInvoicesPage(t *testing.T) {
 			Status:       "Created",
 			CreatedAt:    time.Now().Unix(),
 		}
-		if err := InsertInvoice(ctx, Pool, inv); err != nil {
+		if _, err := InsertInvoice(ctx, Pool, inv); err != nil {
 			t.Fatalf("InsertInvoice %s: %v", id, err)
 		}
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
 			for _, id := range []string{id1, id2} {
-				Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+				_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
 			}
 		}
 	})
@@ -213,7 +251,7 @@ func TestGetProtocolStats_CountsListenerStatuses(t *testing.T) {
 		inv.Status = s.status
 		inv.FundedAmount = s.funded
 		inv.DiscountBps = s.discountBps
-		if err := InsertInvoice(ctx, tx, inv); err != nil {
+		if _, err := InsertInvoice(ctx, tx, inv); err != nil {
 			t.Fatalf("InsertInvoice %s: %v", s.status, err)
 		}
 	}
@@ -318,12 +356,12 @@ func TestUpdateInvoiceListed(t *testing.T) {
 
 	ctx := context.Background()
 	id := fmt.Sprintf("listed-test%d", time.Now().UnixNano())
-	if err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
+	if _, err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
 		t.Fatalf("InsertInvoice: %v", err)
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
-			Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
 		}
 	})
 
@@ -348,12 +386,12 @@ func TestUpdateInvoiceFunded(t *testing.T) {
 
 	ctx := context.Background()
 	id := fmt.Sprintf("funded-test%d", time.Now().UnixNano())
-	if err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
+	if _, err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
 		t.Fatalf("InsertInvoice: %v", err)
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
-			Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
 		}
 	})
 
@@ -382,17 +420,17 @@ func TestUpdateInvoiceShipped(t *testing.T) {
 
 	ctx := context.Background()
 	id := fmt.Sprintf("shipped-test%d", time.Now().UnixNano())
-	if err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
+	if _, err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
 		t.Fatalf("InsertInvoice: %v", err)
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
-			Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
 		}
 	})
 
 	shippedAt := time.Now().Unix()
-	if err := UpdateInvoiceShipped(ctx, Pool, id, "Shipped", shippedAt); err != nil {
+	if err := UpdateInvoiceShipped(ctx, Pool, id, "Active", shippedAt); err != nil {
 		t.Fatalf("UpdateInvoiceShipped: %v", err)
 	}
 
@@ -400,8 +438,8 @@ func TestUpdateInvoiceShipped(t *testing.T) {
 	if err != nil || got == nil {
 		t.Fatalf("GetInvoiceByID: err=%v, got=%v", err, got)
 	}
-	if got.Status != "Shipped" {
-		t.Errorf("Status: got %q, want %q", got.Status, "Shipped")
+	if got.Status != "Active" {
+		t.Errorf("Status: got %q, want %q", got.Status, "Active")
 	}
 	if got.ShippedAt == nil || *got.ShippedAt != shippedAt {
 		t.Errorf("ShippedAt: got %v, want %d", got.ShippedAt, shippedAt)
@@ -416,12 +454,12 @@ func TestUpdateInvoiceDeliveryConfirmed(t *testing.T) {
 
 	ctx := context.Background()
 	id := fmt.Sprintf("delivered-test%d", time.Now().UnixNano())
-	if err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
+	if _, err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
 		t.Fatalf("InsertInvoice: %v", err)
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
-			Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
 		}
 	})
 
@@ -450,12 +488,12 @@ func TestUpdateInvoiceRepaid(t *testing.T) {
 
 	ctx := context.Background()
 	id := fmt.Sprintf("repaid-test%d", time.Now().UnixNano())
-	if err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
+	if _, err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
 		t.Fatalf("InsertInvoice: %v", err)
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
-			Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
 		}
 	})
 
@@ -481,12 +519,12 @@ func TestUpdateInvoiceStatus(t *testing.T) {
 
 	ctx := context.Background()
 	id := fmt.Sprintf("status-test%d", time.Now().UnixNano())
-	if err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
+	if _, err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
 		t.Fatalf("InsertInvoice: %v", err)
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
-			Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
 		}
 	})
 
@@ -563,7 +601,7 @@ func TestLogEventAndProcessedLookups(t *testing.T) {
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
-			Pool.Exec(ctx, "DELETE FROM events_log WHERE event_id = $1", eventID)
+			_, _ = Pool.Exec(ctx, "DELETE FROM events_log WHERE event_id = $1", eventID)
 		}
 	})
 
@@ -686,12 +724,12 @@ func TestUpdateInvoiceAttestation(t *testing.T) {
 		CreatedAt:    time.Now().Unix(),
 	}
 
-	if err := InsertInvoice(ctx, Pool, inv); err != nil {
+	if _, err := InsertInvoice(ctx, Pool, inv); err != nil {
 		t.Fatalf("InsertInvoice: %v", err)
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
-			Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
 		}
 	})
 
@@ -734,5 +772,71 @@ func TestUpdateInvoiceAttestation(t *testing.T) {
 	}
 	if got.AttestedAt == nil || *got.AttestedAt != attestedAt {
 		t.Errorf("AttestedAt: got %v, want %d", got.AttestedAt, attestedAt)
+	}
+}
+
+// TestInvoiceCheckConstraints proves the migration 012 CHECK constraints reject
+// values the application code would otherwise silently accept.
+func TestInvoiceCheckConstraints(t *testing.T) {
+	skipIfNoDB(t)
+
+	ctx := context.Background()
+	id := fmt.Sprintf("constraint-test%d", time.Now().UnixNano())
+	if _, err := InsertInvoice(ctx, Pool, newTestInvoice(id)); err != nil {
+		t.Fatalf("InsertInvoice: %v", err)
+	}
+	t.Cleanup(func() {
+		if Pool != nil {
+			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+		}
+	})
+
+	cases := []struct {
+		name  string
+		query string
+	}{
+		{"invalid status", `UPDATE invoices SET status = 'Bogus' WHERE id = $1`},
+		{"discount_bps above 5000", `UPDATE invoices SET discount_bps = 5001 WHERE id = $1`},
+		{"negative discount_bps", `UPDATE invoices SET discount_bps = -1 WHERE id = $1`},
+		{"risk_score_bps above 10000", `UPDATE invoices SET risk_score_bps = 10001 WHERE id = $1`},
+		{"negative risk_score_bps", `UPDATE invoices SET risk_score_bps = -1 WHERE id = $1`},
+		{"negative face_value", `UPDATE invoices SET face_value = -1 WHERE id = $1`},
+		{"negative funded_amount", `UPDATE invoices SET funded_amount = -1 WHERE id = $1`},
+		{"funded_amount above face_value", `UPDATE invoices SET funded_amount = face_value + 1 WHERE id = $1`},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if _, err := Pool.Exec(ctx, tc.query, id); err == nil {
+				t.Errorf("%s: expected constraint violation, got nil error", tc.name)
+			}
+		})
+	}
+}
+
+// TestPoolSnapshotsConstraints proves pool_snapshots is locked to its single
+// id = 1 row and that utilization_rate_bps stays within 0-10000.
+func TestPoolSnapshotsConstraints(t *testing.T) {
+	skipIfNoDB(t)
+
+	ctx := context.Background()
+	if _, err := Pool.Exec(ctx, `INSERT INTO pool_snapshots (id) VALUES (2)`); err == nil {
+		if Pool != nil {
+			_, _ = Pool.Exec(ctx, "DELETE FROM pool_snapshots WHERE id = 2")
+		}
+		t.Error("second pool_snapshots row: expected constraint violation, got nil error")
+	}
+	if _, err := Pool.Exec(ctx, `UPDATE pool_snapshots SET utilization_rate_bps = 10001 WHERE id = 1`); err == nil {
+		t.Error("utilization_rate_bps above 10000: expected constraint violation, got nil error")
+	}
+}
+
+// TestCheckpointValueConstraint proves negative indexer checkpoints are rejected.
+func TestCheckpointValueConstraint(t *testing.T) {
+	skipIfNoDB(t)
+
+	ctx := context.Background()
+	if _, err := Pool.Exec(ctx, `UPDATE indexer_checkpoint SET value = -1 WHERE key = 'latest_processed_ledger'`); err == nil {
+		t.Error("negative checkpoint value: expected constraint violation, got nil error")
 	}
 }

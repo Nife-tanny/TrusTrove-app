@@ -120,11 +120,13 @@ async function mockNotificationApis(
 }
 
 async function connectWallet(page: Page) {
-  const connectBtn = page.getByRole("button", { name: /connect wallet/i });
+  // Scoped to the Navbar: pages like /profile render their own connect button.
+  const navbar = page.getByRole("navigation");
+  const connectBtn = navbar.getByRole("button", { name: /connect wallet/i });
   await expect(connectBtn).toBeVisible({ timeout: 15000 });
   await connectBtn.click();
   await expect(
-    page.getByRole("button", { name: /disconnect wallet/i }),
+    navbar.getByRole("button", { name: /disconnect wallet/i }),
   ).toBeVisible({ timeout: 15000 });
 }
 
@@ -348,7 +350,10 @@ test.describe("Notification bell, persistence and preferences", () => {
       (window as any).freighter.getPublicKey = () => Promise.resolve(addr);
     }, WALLET_B);
 
-    await page.getByRole("button", { name: /disconnect wallet/i }).click();
+    await page
+      .getByRole("navigation")
+      .getByRole("button", { name: /disconnect wallet/i })
+      .click();
     await connectWallet(page);
 
     // The new wallet is party to no invoices, so it must show nothing.
