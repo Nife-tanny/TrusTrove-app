@@ -99,8 +99,7 @@ func (h *APIHandler) HandleCreateWebhook(w http.ResponseWriter, r *http.Request)
 	}
 
 	var req CreateWebhookRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid JSON body", http.StatusBadRequest)
+	if !decodeJSONBody(w, r, &req, maxCreateWebhookBodyBytes) {
 		return
 	}
 
