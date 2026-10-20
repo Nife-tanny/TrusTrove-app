@@ -107,6 +107,29 @@ test.describe("Onboarding tour on first connect", () => {
     await expect(tour).toBeVisible();
     await expect(tour.getByRole("heading")).toHaveText("Welcome to TrusTrove");
   });
+
+  test("returns focus to the launcher when dismissed", async ({ page }) => {
+    await page.goto("/");
+    await connectWallet(page);
+
+    const tour = page.getByTestId("onboarding-tour");
+    await page.keyboard.press("Escape");
+    await expect(tour).toHaveCount(0);
+
+    const launcher = page
+      .getByRole("navigation")
+      .locator('[data-tour="tour-launcher"]:visible');
+    // Focus explicitly as well as clicking: modal cleanup restores whatever had
+    // focus when the dialog mounted, and a mouse click does not move focus to a
+    // button on every platform.
+    await launcher.focus();
+    await launcher.click();
+    await expect(tour).toBeVisible();
+
+    await page.keyboard.press("Escape");
+    await expect(tour).toHaveCount(0);
+    await expect(launcher).toBeFocused();
+  });
 });
 
 test.describe("Onboarding tour suppressed by the shared fixture", () => {

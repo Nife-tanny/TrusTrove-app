@@ -31,6 +31,19 @@
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 44%;
     --destructive-foreground: 0 0% 100%;
+    /*
+     * Status accents. Each `--<status>` is dark enough to be used as *text*
+     * on every light surface (background, card and muted) at >= 4.5:1, and its
+     * `-foreground` is the readable ink on top of it when it is used as a fill.
+     * Pages must use these instead of `text-emerald-400`-style palette classes,
+     * which are tuned for one theme only.
+     */
+    --success: 160 84% 25%;
+    --success-foreground: 0 0% 100%;
+    --warning: 32 90% 30%;
+    --warning-foreground: 0 0% 100%;
+    --info: 199 89% 32%;
+    --info-foreground: 0 0% 100%;
     --border: 214 25% 85%;
     --input: 214 25% 85%;
     --ring: 168 84% 26%;
@@ -52,11 +65,23 @@
     --secondary: 217 91% 60%;
     --secondary-foreground: 210 40% 98%;
     --muted: 211 32% 7.6%;
-    --muted-foreground: 215 16% 47%;
+    /*
+     * 52% instead of 47%: muted body copy sits on --card (7.6%) and was
+     * 3.95:1 there, below AA. This value is 4.72:1 on card/background/muted and
+     * still reads as secondary against the 96% foreground.
+     */
+    --muted-foreground: 215 16% 52%;
     --accent: 217 91% 60%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
+    /* Status accents light enough for text on the dark surfaces (9-10:1). */
+    --success: 160 84% 45%;
+    --success-foreground: 210 33% 4.7%;
+    --warning: 38 92% 60%;
+    --warning-foreground: 210 33% 4.7%;
+    --info: 199 89% 64%;
+    --info-foreground: 210 33% 4.7%;
     --border: 214 30% 14.7%;
     --input: 214 30% 14.7%;
     --ring: 168 100% 41.6%;
