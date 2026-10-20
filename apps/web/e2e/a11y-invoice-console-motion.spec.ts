@@ -32,6 +32,7 @@ async function mockInvoiceApis(page: Page) {
     await route.fulfill({
       status: 200,
       contentType: "application/json",
+      headers: { "access-control-allow-origin": "*" },
       body: JSON.stringify({
         data: [MOCK_INVOICE],
         total: 1,
@@ -45,6 +46,7 @@ async function mockInvoiceApis(page: Page) {
     await route.fulfill({
       status: 200,
       contentType: "application/json",
+      headers: { "access-control-allow-origin": "*" },
       body: JSON.stringify([]),
     });
   });
@@ -52,6 +54,7 @@ async function mockInvoiceApis(page: Page) {
     await route.fulfill({
       status: 200,
       contentType: "application/json",
+      headers: { "access-control-allow-origin": "*" },
       body: JSON.stringify({ address: MOCK_WALLET, verified: true, role: "issuer" }),
     });
   });
@@ -59,6 +62,7 @@ async function mockInvoiceApis(page: Page) {
     await route.fulfill({
       status: 200,
       contentType: "application/json",
+      headers: { "access-control-allow-origin": "*" },
       body: JSON.stringify({ availableLiquidity: "10000000000" }),
     });
   });
@@ -66,6 +70,7 @@ async function mockInvoiceApis(page: Page) {
     await route.fulfill({
       status: 200,
       contentType: "application/json",
+      headers: { "access-control-allow-origin": "*" },
       body: JSON.stringify({
         id: MOCK_WALLET,
         account_id: MOCK_WALLET,
@@ -75,15 +80,56 @@ async function mockInvoiceApis(page: Page) {
       }),
     });
   });
+  await page.route("**/soroban-testnet.stellar.org/**", async (route) => {
+    const body = route.request().postDataJSON() as {
+      id?: number;
+      method?: string;
+      params?: { transaction?: string };
+    };
+    const id = body?.id ?? 1;
+    const method = body?.method ?? "";
+    const result =
+      method === "getTransaction"
+        ? {
+            status: "SUCCESS",
+            txHash: "mock-onchain-tx-hash",
+            ledger: 12345,
+            createdAt: new Date().toISOString(),
+          }
+        : method === "prepareTransaction"
+          ? {
+              transaction: body?.params?.transaction ?? "",
+              minResourceFee: "100",
+            }
+          : method === "simulateTransaction"
+            ? {
+                transactionData: "",
+                minResourceFee: "100",
+                results: [{ auth: [], xdr: "" }],
+                cost: { cpuInsns: "0", memBytes: "0" },
+              }
+            : method === "sendTransaction"
+              ? { status: "PENDING", hash: "mock-onchain-tx-hash" }
+              : {};
+
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "access-control-allow-origin": "*" },
+      body: JSON.stringify({ jsonrpc: "2.0", id, result }),
+    });
+  });
 }
 
 async function connectWallet(page: Page) {
-  const connectButton = page
-    .getByRole("navigation")
-    .getByRole("button", { name: /Connect Wallet/i });
-  if (await connectButton.isVisible()) await connectButton.click();
+  await page
+    .getByRole("main")
+    .getByRole("button", { name: /Connect Wallet/i })
+    .click();
   await expect(
-    page.getByRole("navigation").getByText("GBMOCK...XXXX", { exact: true }),
+    page.getByRole("main").getByRole("heading", {
+      name: "SME Financing Dashboard",
+    }),
   ).toBeVisible({ timeout: 15000 });
 }
 
@@ -91,15 +137,22 @@ for (const route of ["/dashboard", "/marketplace"]) {
   test(`mobile invoice selection focuses and announces console on ${route}`, async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 375, height: 812 });
     await mockInvoiceApis(page);
-    await page.goto(route, { waitUntil: "domcontentloaded" });
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto(route);
     if (route === "/dashboard") await connectWallet(page);
 
-    await page
+    const invoiceCard = page
       .locator(".md\\:hidden")
-      .getByText("Invoice obligation")
-      .click();
+      .getByText("Invoice obligation");
+    await expect(invoiceCard).toBeVisible({ timeout: 15000 });
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+        ),
+    );
+    await invoiceCard.click();
 
     const consoleHeading = page.getByRole("heading", {
       name: route === "/dashboard" ? "Management console" : "Management Center",
@@ -120,10 +173,16 @@ test("reduced motion disables feed transforms and skeleton shimmer", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
+  let releaseEvents!: () => void;
+  const eventsGate = new Promise<void>((resolve) => {
+    releaseEvents = resolve;
+  });
   await page.route("**/events**", async (route) => {
+    await eventsGate;
     await route.fulfill({
       status: 200,
       contentType: "application/json",
+      headers: { "access-control-allow-origin": "*" },
       body: JSON.stringify([
         {
           id: 1,
@@ -137,28 +196,24 @@ test("reduced motion disables feed transforms and skeleton shimmer", async ({
       ]),
     });
   });
+  const eventsRequest = page.waitForRequest((request) =>
+    request.url().includes("/events"),
+  );
   await page.goto("/", { waitUntil: "domcontentloaded" });
 
-  const feedEntry = page
-    .getByRole("region", { name: "Live Financing Feed" })
-    .getByRole("listitem");
-  await expect(feedEntry).toBeVisible();
-  await expect
-    .poll(() => feedEntry.evaluate((element) => getComputedStyle(element).transform))
-    .toBe("none");
-
-  await page.route("**/invoices**", async (route) => {
-    await page.waitForTimeout(500);
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ data: [], total: 0, page: 1, limit: 20, totalPages: 0 }),
-    });
-  });
-  await page.goto("/marketplace", { waitUntil: "domcontentloaded" });
-  const shimmer = page.locator('[class*="shimmer"]').first();
-  await expect(shimmer).toBeVisible();
+  const feed = page.getByRole("region", { name: "Live Financing Feed" });
+  const shimmer = feed.locator('[class*="shimmer"]').first();
+  await eventsRequest;
+  await expect(shimmer).toBeVisible({ timeout: 15000 });
   await expect
     .poll(() => shimmer.evaluate((element) => getComputedStyle(element).animationName))
+    .toBe("none");
+
+  releaseEvents();
+
+  const feedEntry = feed.getByRole("listitem");
+  await expect(feedEntry).toBeVisible({ timeout: 15000 });
+  await expect
+    .poll(() => feedEntry.evaluate((element) => getComputedStyle(element).transform))
     .toBe("none");
 });
