@@ -405,6 +405,7 @@ func (l *EventListener) pollEvents(ctx context.Context, startLedger int32) (int3
 		if err != nil {
 			return startLedger, err
 		}
+		l.observeLedgerMetrics(latest, latest+1)
 		return latest + 1, nil
 	}
 
@@ -495,6 +496,7 @@ func (l *EventListener) pollEvents(ctx context.Context, startLedger int32) (int3
 	}
 
 	if latestLedgerSeq < startLedger {
+		l.observeLedgerMetrics(latestLedgerSeq, startLedger)
 		return startLedger, nil
 	}
 	next := latestLedgerSeq + 1
@@ -504,11 +506,34 @@ func (l *EventListener) pollEvents(ctx context.Context, startLedger int32) (int3
 		// instead of checkpointing ledgers that could still be reorganized.
 		safeLedger := latestLedgerSeq - int32(depth)
 		if safeLedger < startLedger {
+			l.observeLedgerMetrics(latestLedgerSeq, startLedger)
 			return startLedger, nil
 		}
 		next = safeLedger + 1
 	}
+	l.observeLedgerMetrics(latestLedgerSeq, next)
 	return next, nil
+}
+
+// observeLedgerMetrics publishes the listener's position: the newest ledger
+// the next poll will treat as processed (nextLedger-1) and how far that is
+// behind the chain tip reported by the RPC. Both gauges were previously
+// registered but never written (#1077).
+func (l *EventListener) observeLedgerMetrics(latestLedger, nextLedger int32) {
+	if latestLedger <= 0 {
+		return
+	}
+	processed := nextLedger - 1
+	if processed < 0 {
+		processed = 0
+	}
+	api.ListenerLastLedger.Set(float64(processed))
+
+	lag := latestLedger - processed
+	if lag < 0 {
+		lag = 0
+	}
+	api.LedgerLag.Set(float64(lag))
 }
 
 // confirmationDepth is how many ledgers behind the RPC tip an event's ledger
