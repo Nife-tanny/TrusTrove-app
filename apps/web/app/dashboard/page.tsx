@@ -9,7 +9,7 @@ import { InvoiceTable } from "@/components/invoice/InvoiceTable";
 import { InvoiceCard } from "@/components/invoice/InvoiceCard";
 import { InvoiceFormLoader } from "@/components/invoice/InvoiceFormLoader";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
-import { useInvoiceList } from "@/hooks/useInvoices";
+import { useInvoiceList, useInvoiceStats } from "@/hooks/useInvoices";
 import { useRecentEvents } from "@/hooks/useEvents";
 import { useWalletStore } from "@/store/wallet";
 import { useProfile } from "@/hooks/useProfile";
@@ -63,16 +63,13 @@ export default function SMEDashboard() {
     setSelectedInvoice(null);
   }, [invoicePage, invoiceLimit, address]);
 
-  // Compute stats
-  const totalFunded = invoices.reduce((sum, inv) => sum + inv.fundedAmount, 0n);
-  const totalInvoicesCreated = invoices.length;
-  const totalListed = invoices.filter((i) => i.status === "Listed").length;
-  const totalFundedActive = invoices.filter(
-    (i) =>
-      i.status === "Funded" ||
-      i.status === "Active" ||
-      i.status === "Confirmed",
-  ).length;
+  const {
+    totalFunded,
+    totalInvoicesCreated,
+    totalListed,
+    totalFundedActive,
+    totalRepaid,
+  } = stats;
 
   const handlePageChange = (page: number) => {
     setInvoicePage(page);
