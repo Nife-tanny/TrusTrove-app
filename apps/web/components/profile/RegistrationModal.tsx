@@ -187,9 +187,7 @@ export function RegistrationModal({
                     Company Name
                   </label>
                   <div className="relative">
-                    <Building2
-                      className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground"
-                    />
+                    <Building2 className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
                     <input
                       id="registration-company-name"
                       type="text"
@@ -212,9 +210,7 @@ export function RegistrationModal({
                       Tax ID / Registration No.
                     </label>
                     <div className="relative">
-                      <FileText
-                        className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground"
-                      />
+                      <FileText className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
                       <input
                         id="registration-tax-id"
                         type="text"
@@ -235,9 +231,7 @@ export function RegistrationModal({
                       Country of Incorporation
                     </label>
                     <div className="relative">
-                      <Globe
-                        className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground"
-                      />
+                      <Globe className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
                       <input
                         id="registration-country"
                         type="text"
@@ -260,9 +254,7 @@ export function RegistrationModal({
                     Corporate Website URL (Optional)
                   </label>
                   <div className="relative">
-                    <Globe
-                      className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground"
-                    />
+                    <Globe className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
                     <input
                       id="registration-website"
                       type="url"
@@ -283,9 +275,7 @@ export function RegistrationModal({
                     Contact Email (Optional)
                   </label>
                   <div className="relative">
-                    <Mail
-                      className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground"
-                    />
+                    <Mail className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
                     <input
                       id="registration-email"
                       type="email"
