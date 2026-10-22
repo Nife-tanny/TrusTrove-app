@@ -8,7 +8,7 @@
     "analyze": "ANALYZE=true next build",
     "start": "next start",
     "lint": "next lint",
-    "test:e2e": "playwright test --reporter=line",
+    "test:e2e": "playwright test",
     "test": "vitest run --coverage --passWithNoTests",
     "test:coverage": "vitest run --coverage --passWithNoTests"
   },
@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "14.2.35",
-    "@playwright/test": "^1.41.2",
+    "@playwright/test": "1.63.0",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.7",
