@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/network";
 
 const THEME_KEY = "trusttrove:theme";
 const NEXT_SCRIPTS = "**/_next/static/**/*.js";
