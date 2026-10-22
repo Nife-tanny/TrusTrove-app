@@ -26,7 +26,7 @@ export function HeroStats() {
       {/* Pool Value */}
       <div className="text-center lg:text-left">
         <StatValue value={formatCompactUsdc(stats?.totalDeposits)} />
-        <span className="text-[10px] font-mono text-slate-500 uppercase font-bold tracking-wider block mt-1">
+        <span className="text-[10px] font-mono text-muted-foreground uppercase font-bold tracking-wider block mt-1">
           USDC POOL VALUE
         </span>
       </div>
@@ -38,7 +38,7 @@ export function HeroStats() {
             stats ? stats.activeInvoiceCount.toLocaleString("en-US") : null
           }
         />
-        <span className="text-[10px] font-mono text-slate-500 uppercase font-bold tracking-wider block mt-1">
+        <span className="text-[10px] font-mono text-muted-foreground uppercase font-bold tracking-wider block mt-1">
           INVOICES FUNDED
         </span>
       </div>
@@ -46,7 +46,7 @@ export function HeroStats() {
       {/* Yield Distributed */}
       <div className="text-center lg:text-left">
         <StatValue value={formatCompactUsdc(stats?.totalYieldDistributed)} />
-        <span className="text-[10px] font-mono text-slate-500 uppercase font-bold tracking-wider block mt-1">
+        <span className="text-[10px] font-mono text-muted-foreground uppercase font-bold tracking-wider block mt-1">
           YIELD DISTRIBUTED
         </span>
       </div>

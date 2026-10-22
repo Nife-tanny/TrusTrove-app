@@ -19,14 +19,14 @@ contract clients eagerly:
 
 `ANALYZE=true pnpm --filter web build` (First Load JS):
 
-| Route                  | Before  | After   | Change          |
-| ---------------------- | ------- | ------- | --------------- |
-| `/`                    | 477 kB  | 238 kB  | −239 kB (−50%)  |
-| `/dashboard`           | 491 kB  | 251 kB  | −240 kB (−49%)  |
-| `/invoice/[invoiceId]` | 477 kB  | 238 kB  | −239 kB (−50%)  |
-| `/marketplace`         | 450 kB  | 210 kB  | −240 kB (−53%)  |
-| `/analytics`           | 531 kB  | 291 kB  | −240 kB (−45%)  |
-| Shared by all          | 87.8 kB | 87.9 kB | +0.1 kB         |
+| Route                  | Before  | After   | Change         |
+| ---------------------- | ------- | ------- | -------------- |
+| `/`                    | 477 kB  | 238 kB  | −239 kB (−50%) |
+| `/dashboard`           | 491 kB  | 251 kB  | −240 kB (−49%) |
+| `/invoice/[invoiceId]` | 477 kB  | 238 kB  | −239 kB (−50%) |
+| `/marketplace`         | 450 kB  | 210 kB  | −240 kB (−53%) |
+| `/analytics`           | 531 kB  | 291 kB  | −240 kB (−45%) |
+| Shared by all          | 87.8 kB | 87.9 kB | +0.1 kB        |
 
 ## #998 — form field labelling
 

@@ -28,7 +28,8 @@ describe("truncateTxHash", () => {
   });
 
   it("shortens a mixed 64-char hash", () => {
-    const hash = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+    const hash =
+      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
     expect(truncateTxHash(hash)).toBe("01234567...abcdef");
   });
 

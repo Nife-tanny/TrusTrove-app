@@ -72,9 +72,11 @@ export function DatePicker({
           }}
           disabled={(date) => {
             if (minDate) {
-              const today = new Date();
-              today.setHours(0, 0, 0, 0);
-              return date < today;
+              const min = new Date(minDate);
+              min.setHours(0, 0, 0, 0);
+              const candidate = new Date(date);
+              candidate.setHours(0, 0, 0, 0);
+              return candidate < min;
             }
             return false;
           }}

@@ -1,5 +1,12 @@
 "use client";
 
+// global-error replaces the root layout when it renders, so layout.tsx's
+// stylesheet never loads in this state. Import it here or the crash screen
+// ships unstyled: the Tailwind classes below need the tokens defined in this
+// file, and app/layout.tsx (the usual importer) is not rendered behind an
+// error boundary at this level.
+import "./globals.css";
+
 import { useEffect } from "react";
 
 export default function GlobalError({

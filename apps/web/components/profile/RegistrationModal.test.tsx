@@ -1,5 +1,11 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { RegistrationModal } from "./RegistrationModal";
 
@@ -300,7 +306,9 @@ describe("RegistrationModal", () => {
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /register profile/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /register profile/i }),
+      );
     });
 
     // Before register resolves, only one dialog may carry aria-modal=true.

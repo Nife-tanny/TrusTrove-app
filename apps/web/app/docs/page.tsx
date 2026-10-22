@@ -26,7 +26,9 @@ export default function DocsPage() {
       "DELEGATING TRAFFIC TO SECURE SOURCE...",
     ];
 
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
     if (prefersReducedMotion) {
       setLogs(logMessages);

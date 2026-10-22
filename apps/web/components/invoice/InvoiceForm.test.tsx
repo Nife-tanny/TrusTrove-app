@@ -207,7 +207,9 @@ describe("InvoiceForm Component Boundary Tests", () => {
     vi.mocked(InvoiceClient).mockImplementation(function () {
       return {
         simulateTransaction: vi.fn().mockResolvedValue({}),
-        listForFinancing: vi.fn().mockRejectedValue(new Error("listing failed")),
+        listForFinancing: vi
+          .fn()
+          .mockRejectedValue(new Error("listing failed")),
       };
     } as any);
 
@@ -261,9 +263,7 @@ describe("InvoiceForm Component Boundary Tests", () => {
 
     // Step 2: trigger creation (immediate list is on by default).
     await act(async () => {
-      fireEvent.click(
-        screen.getByRole("button", { name: /create invoice/i }),
-      );
+      fireEvent.click(screen.getByRole("button", { name: /create invoice/i }));
     });
 
     // The rollback must call PATCH /invoices/:id/status (not a 404ing path).

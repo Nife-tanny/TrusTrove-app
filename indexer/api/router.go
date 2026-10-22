@@ -294,6 +294,22 @@ func parseTrustedProxyCIDRs(raw string) []*net.IPNet {
 	return cidrs
 }
 
+func ipInNetworks(ip net.IP, networks []*net.IPNet) bool {
+	for _, network := range networks {
+		if network.Contains(ip) {
+			return true
+		}
+	}
+	return false
+}
+
+// trustedClientIP resolves the client address behind a trusted proxy. The
+// proxy appends the peer it saw to the right of X-Forwarded-For, so only the
+// rightmost hop can be trusted: anything to its left is client-supplied and
+// may be spoofed. Walking right-to-left and skipping known proxy addresses
+// picks the first hop the chain does not vouch for (#1083), unlike the old
+// leftmost-wins behavior that let a client mint a new rate-limit key per
+// request.
 func trustedClientIP(r *http.Request, trustedProxyNets []*net.IPNet) string {
 	if len(trustedProxyNets) == 0 {
 		return ""
@@ -308,28 +324,45 @@ func trustedClientIP(r *http.Request, trustedProxyNets []*net.IPNet) string {
 		return ""
 	}
 
-	trusted := false
-	for _, network := range trustedProxyNets {
-		if network.Contains(remoteIP) {
-			trusted = true
-			break
-		}
-	}
-	if !trusted {
+	// Forwarded headers are only meaningful when the immediate peer is a
+	// proxy we configured; otherwise they came straight from the client.
+	if !ipInNetworks(remoteIP, trustedProxyNets) {
 		return ""
 	}
 
-	for _, headerName := range []string{"X-Forwarded-For", "X-Real-IP", "True-Client-IP"} {
+	if value := strings.TrimSpace(r.Header.Get("X-Forwarded-For")); value != "" {
+		parts := strings.Split(value, ",")
+		var leftmost net.IP
+		for i := len(parts) - 1; i >= 0; i-- {
+			candidate := strings.TrimSpace(parts[i])
+			if candidate == "" {
+				continue
+			}
+			ip := net.ParseIP(candidate)
+			if ip == nil {
+				continue
+			}
+			if leftmost == nil {
+				leftmost = ip
+			}
+			if !ipInNetworks(ip, trustedProxyNets) {
+				return ip.String()
+			}
+		}
+		// Every hop is a trusted proxy: the leftmost one is the originator.
+		if leftmost != nil {
+			return leftmost.String()
+		}
+		return ""
+	}
+
+	// Fall back to single-value proxy headers only when X-Forwarded-For is
+	// absent. They have no hop list to walk, but the peer check above still
+	// guarantees they were set by a trusted proxy.
+	for _, headerName := range []string{"X-Real-IP", "True-Client-IP"} {
 		if value := strings.TrimSpace(r.Header.Get(headerName)); value != "" {
-			parts := strings.Split(value, ",")
-			for _, part := range parts {
-				candidate := strings.TrimSpace(part)
-				if candidate == "" {
-					continue
-				}
-				if ip := net.ParseIP(candidate); ip != nil {
-					return ip.String()
-				}
+			if ip := net.ParseIP(value); ip != nil {
+				return ip.String()
 			}
 		}
 	}
@@ -368,6 +401,7 @@ func NewRouter(h *APIHandler) (*chi.Mux, func()) {
 	// Global middleware
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
+	r.Use(indexermiddleware.PrometheusMiddleware)
 	r.Use(RecoveryMiddleware())
 	r.Use(TrustedProxyMiddleware(h.cfg.TrustedProxyCIDRs))
 	r.Use(CORSMiddleware(h.cfg.CORSAllowedOrigins))

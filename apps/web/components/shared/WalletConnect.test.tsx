@@ -386,7 +386,9 @@ describe("WalletConnect", () => {
       errorCode: "user_rejected",
     } as any);
     render(<WalletConnect />);
-    const message = await screen.findByText(/You cancelled the connection request/i);
+    const message = await screen.findByText(
+      /You cancelled the connection request/i,
+    );
     expect(message).toHaveAttribute("role", "status");
   });
 
@@ -405,7 +407,9 @@ describe("WalletConnect", () => {
 
   it("renders network switch error with role='alert'", async () => {
     useWalletStore.setState({ network: "futurenet" });
-    freighterApi.setNetwork.mockRejectedValue(new Error("Network switch denied"));
+    freighterApi.setNetwork.mockRejectedValue(
+      new Error("Network switch denied"),
+    );
     vi.mocked(useWallet).mockReturnValue({
       connected: true,
       loading: false,
@@ -449,7 +453,9 @@ describe("WalletConnect", () => {
     const copyButton = await screen.findByLabelText(/Copy wallet address/i);
     fireEvent.click(copyButton);
     await waitFor(() => {
-      expect(screen.getByLabelText(/Copy wallet address/i)).toHaveClass(/text-emerald-400/);
+      expect(screen.getByLabelText(/Copy wallet address/i)).toHaveClass(
+        /text-emerald-400/,
+      );
     });
     const liveRegion = await screen.findByRole("status");
     expect(liveRegion).toHaveTextContent("Address copied");

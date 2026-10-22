@@ -3,7 +3,12 @@
 import React, { useEffect, useState } from "react";
 import { ArrowUpRight, Pause, Play } from "lucide-react";
 import { useRecentEvents } from "@/hooks/useEvents";
-import type { EventLog } from "@/types";
+import {
+  getEventDataBigInt,
+  getEventDataNumber,
+  getEventDataString,
+  type EventLog,
+} from "@/types";
 
 interface TickerItem {
   id: string;
@@ -43,20 +48,19 @@ export function TopStatusBar() {
   const formatEventForTicker = (event: EventLog): TickerItem => {
     // Extract amount from event data (assuming it's in USDC)
     let amount = "0 USDC";
-    if (event.data && event.data.funded_amount) {
-      const amountInUSDC = Number(
-        BigInt(event.data.funded_amount) / 10_000_000n,
-      ); // Convert from stroops (7 decimals) to USDC
-      amount = `${Math.round(amountInUSDC).toLocaleString()} USDC`;
-    } else if (event.data && event.data.face_value) {
-      const amountInUSDC = Number(BigInt(event.data.face_value) / 10_000_000n); // Convert from stroops (7 decimals) to USDC
+    const invoiceAmount =
+      getEventDataBigInt(event, "funded_amount") ??
+      getEventDataBigInt(event, "face_value");
+    if (invoiceAmount !== undefined) {
+      const amountInUSDC = Number(invoiceAmount / 10_000_000n); // Convert from stroops (7 decimals) to USDC
       amount = `${Math.round(amountInUSDC).toLocaleString()} USDC`;
     }
 
     // Extract discount from event data (in basis points)
     let discount = "0.0%";
-    if (event.data && event.data.discount_bps) {
-      const discountPercent = Number(event.data.discount_bps) / 100;
+    const discountBps = getEventDataNumber(event, "discount_bps");
+    if (discountBps !== undefined) {
+      const discountPercent = discountBps / 100;
       discount = `${discountPercent.toFixed(1)}%`;
     }
 
@@ -77,10 +81,12 @@ export function TopStatusBar() {
 
     // Generate SME name based on event data
     let sme = "Unknown SME";
-    if (event.data.buyer) {
-      sme = `${event.data.buyer.slice(0, 8)}...`;
-    } else if (event.data.issuer) {
-      sme = `${event.data.issuer.slice(0, 8)}...`;
+    const buyer = getEventDataString(event, "buyer");
+    const issuer = getEventDataString(event, "issuer");
+    if (buyer) {
+      sme = `${buyer.slice(0, 8)}...`;
+    } else if (issuer) {
+      sme = `${issuer.slice(0, 8)}...`;
     }
 
     return {
@@ -160,7 +166,7 @@ export function TopStatusBar() {
   }, [isMobile]);
 
   return (
-    <div className="w-full bg-[#080c10] border-b border-border py-0.5 px-4 overflow-hidden relative z-40 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4">
+    <div className="w-full bg-background border-b border-border py-0.5 px-4 overflow-hidden relative z-40 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4">
       {/* Network indicator */}
       <div className="flex items-center gap-2 shrink-0 border-r border-border pr-4 w-full sm:w-auto justify-center sm:justify-start">
         <span className="relative flex h-2 w-2">
@@ -184,8 +190,8 @@ export function TopStatusBar() {
             onClick={() => setIsPaused(!isPaused)}
             // 24x24 hit area (WCAG 2.5.8). The bar uses py-0.5 so its height stays
             // 28px; the ring is inset so the overflow-hidden row cannot clip it.
-            // slate-400 is ~7:1 against the #080c10 bar.
-            className="inline-flex items-center justify-center min-w-[24px] min-h-[24px] rounded text-slate-400 hover:text-white focus:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary shrink-0 z-10 transition-colors"
+            // text-muted-foreground is >= 4.5:1 against the bar in both themes.
+            className="inline-flex items-center justify-center min-w-[24px] min-h-[24px] rounded text-muted-foreground hover:text-foreground focus:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary shrink-0 z-10 transition-colors"
             aria-label={isPaused ? "Play ticker" : "Pause ticker"}
           >
             {isPaused ? (
@@ -196,12 +202,12 @@ export function TopStatusBar() {
           </button>
           <div className="flex-1 overflow-hidden relative h-4 flex items-center group">
             {isLoading ? (
-              <div className="inline-flex items-center gap-2 text-[10px] font-mono text-slate-300">
+              <div className="inline-flex items-center gap-2 text-[10px] font-mono text-foreground">
                 <span className="inline-block h-2 w-2 rounded-full bg-sky-400 animate-pulse" />
                 <span>Loading live network activity...</span>
               </div>
             ) : isError ? (
-              <div className="inline-flex items-center gap-2 text-[10px] font-mono text-amber-300">
+              <div className="inline-flex items-center gap-2 text-[10px] font-mono text-amber-700 dark:text-amber-300">
                 <span className="inline-block h-2 w-2 rounded-full bg-amber-400" />
                 <span>Live feed unavailable</span>
               </div>
@@ -214,16 +220,20 @@ export function TopStatusBar() {
                     key={`${item.id}-${idx}`}
                     className="inline-flex items-center gap-2 text-[10px] font-mono"
                   >
-                    <span className="text-slate-500">{item.country}</span>
-                    <span className="text-slate-300 font-bold">{item.sme}</span>
+                    <span className="text-muted-foreground">
+                      {item.country}
+                    </span>
+                    <span className="text-foreground font-bold">
+                      {item.sme}
+                    </span>
                     <span className="text-primary font-bold">
                       {item.amount}
                     </span>
-                    <span className="text-slate-500">at</span>
-                    <span className="text-sky-400 font-semibold">
+                    <span className="text-muted-foreground">at</span>
+                    <span className="text-sky-700 dark:text-sky-400 font-semibold">
                       {item.discount} discount
                     </span>
-                    <span className="text-slate-600">({item.time})</span>
+                    <span className="text-muted-foreground">({item.time})</span>
                     <ArrowUpRight className="w-3 h-3 text-primary/45 shrink-0" />
                   </div>
                 ))}
@@ -234,16 +244,20 @@ export function TopStatusBar() {
                     aria-hidden="true"
                     className="inline-flex items-center gap-2 text-[10px] font-mono"
                   >
-                    <span className="text-slate-500">{item.country}</span>
-                    <span className="text-slate-300 font-bold">{item.sme}</span>
+                    <span className="text-muted-foreground">
+                      {item.country}
+                    </span>
+                    <span className="text-foreground font-bold">
+                      {item.sme}
+                    </span>
                     <span className="text-primary font-bold">
                       {item.amount}
                     </span>
-                    <span className="text-slate-500">at</span>
-                    <span className="text-sky-400 font-semibold">
+                    <span className="text-muted-foreground">at</span>
+                    <span className="text-sky-700 dark:text-sky-400 font-semibold">
                       {item.discount} discount
                     </span>
-                    <span className="text-slate-600">({item.time})</span>
+                    <span className="text-muted-foreground">({item.time})</span>
                     <ArrowUpRight className="w-3 h-3 text-primary/45 shrink-0" />
                   </div>
                 ))}

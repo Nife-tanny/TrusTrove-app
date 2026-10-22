@@ -163,7 +163,10 @@ describe("TopStatusBar", () => {
     expect(toggle.className).toContain("min-w-[24px]");
     expect(toggle.className).toContain("min-h-[24px]");
     expect(toggle.className).toContain("focus-visible:ring-2");
-    expect(toggle.className).toContain("text-slate-400");
+    // #1009: the palette idle colour became a theme token so the control
+    // clears 4.5:1 on the bar in both themes (slate-400 fails on light).
+    expect(toggle.className).toContain("text-muted-foreground");
+    expect(toggle.className).not.toContain("text-slate-400");
     expect(toggle.className).not.toContain("text-slate-500");
   });
 

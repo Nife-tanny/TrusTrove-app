@@ -9,7 +9,7 @@ const LpYieldCalculator = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="bg-[#0d131a] border border-border rounded-lg p-5 space-y-5 shadow-[0_0_30px_rgba(0,212,170,0.02)]">
+      <div className="bg-card border border-border rounded-lg p-5 space-y-5 shadow-[0_0_30px_rgba(0,212,170,0.02)]">
         <SkeletonShimmer className="h-4 w-32" />
         <div className="space-y-4">
           <SkeletonShimmer className="h-10 w-full" />
@@ -18,7 +18,7 @@ const LpYieldCalculator = dynamic(
             <SkeletonShimmer className="h-6 w-full" />
           </div>
         </div>
-        <div className="bg-[#080c10] border border-border/60 rounded p-4 space-y-3">
+        <div className="bg-background border border-border/60 rounded p-4 space-y-3">
           <SkeletonShimmer className="h-3 w-40" />
           <SkeletonShimmer className="h-8 w-20" />
           <SkeletonShimmer className="h-3 w-32" />
@@ -35,7 +35,7 @@ const DiscountCalculator = dynamic(
     ssr: false,
     loading: () => (
       <div className="bg-card border border-border rounded-lg overflow-hidden">
-        <div className="flex border-b border-border bg-[#080c10]/60">
+        <div className="flex border-b border-border bg-background/60">
           <SkeletonShimmer className="flex-1 h-12" />
           <SkeletonShimmer className="flex-1 h-12" />
         </div>

@@ -419,4 +419,3 @@ func TestHandlePatchInvoiceStatus_DBErrorReturns500(t *testing.T) {
 		t.Errorf("expected 500 on db error, got %d", rr.Code)
 	}
 }
-

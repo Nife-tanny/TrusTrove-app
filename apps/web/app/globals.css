@@ -63,16 +63,18 @@
     --primary: 168 100% 41.6%;
     --primary-foreground: 210 33% 4.7%;
     --secondary: 217 91% 60%;
-    --secondary-foreground: 210 40% 98%;
+    /* See --accent-foreground: white on this bright blue fails AA (3.63:1). */
+    --secondary-foreground: 210 33% 4.7%;
     --muted: 211 32% 7.6%;
-    /*
-     * 52% instead of 47%: muted body copy sits on --card (7.6%) and was
-     * 3.95:1 there, below AA. This value is 4.72:1 on card/background/muted and
-     * still reads as secondary against the 96% foreground.
-     */
-    --muted-foreground: 215 16% 52%;
+    /* 47% measured 3.97:1 on --card/--background (AA needs 4.5:1 for the
+       9-11px captions that use text-muted-foreground). 54% clears 4.5:1 on
+       both dark surfaces (~5.1:1) while staying clearly below --foreground. */
+    --muted-foreground: 215 16% 54%;
     --accent: 217 91% 60%;
-    --accent-foreground: 210 40% 98%;
+    /* --accent and --secondary are bright fills in the dark theme; white text
+       on them measured 3.63:1 (AA fail). Near-black restores ~5.3:1, mirroring
+       what --primary-foreground already does over --primary. */
+    --accent-foreground: 210 33% 4.7%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     /* Status accents light enough for text on the dark surfaces (9-10:1). */

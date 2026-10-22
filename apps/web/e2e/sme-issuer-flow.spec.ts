@@ -359,9 +359,7 @@ test.describe("SME Issuer Flow - Happy Path", () => {
       await page.setViewportSize({ width, height: 800 });
 
       const overflow = await dialog.evaluate((element) => {
-        const panel = element.querySelector<HTMLElement>(
-          ".overflow-y-auto",
-        );
+        const panel = element.querySelector<HTMLElement>(".overflow-y-auto");
         return {
           dialog: element.scrollWidth - element.clientWidth,
           panel: panel ? panel.scrollWidth - panel.clientWidth : 0,

@@ -33,7 +33,7 @@ const stellarExpertUrl = process.env.NEXT_PUBLIC_POOL_CONTRACT_ID
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-primary selection:text-black">
+    <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-primary selection:text-primary-foreground">
       {/* Top Status Bar with scrolling ticker */}
       <TopStatusBar />
 
@@ -45,8 +45,9 @@ export default function Home() {
         id="main-content"
         className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-20 relative"
       >
-        {/* Subtle grid background pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1a2330_1px,transparent_1px),linear-gradient(to_bottom,#1a2330_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] -z-10 opacity-20 pointer-events-none" />
+        {/* Subtle grid background pattern — border token so the grid lines
+            follow the theme instead of staying dark on light (#1009) */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] -z-10 opacity-20 pointer-events-none" />
 
         {/* 3-Column Split Hero */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-4 items-start">
@@ -55,7 +56,7 @@ export default function Home() {
             <ErrorBoundary context="InvoiceFeed">
               <InvoiceFeed />
             </ErrorBoundary>
-            <div className="bg-[#0d131a] border border-border rounded-lg p-4 font-mono text-[10px] text-slate-500 leading-normal">
+            <div className="bg-card border border-border rounded-lg p-4 font-mono text-[10px] text-muted-foreground leading-normal">
               <span className="text-primary font-bold block mb-1">
                 STELLAR INTEGRATION
               </span>
@@ -70,15 +71,15 @@ export default function Home() {
               <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold font-mono tracking-widest uppercase rounded">
                 DECENTRALIZED TRADE FINANCE
               </span>
-              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight font-mono uppercase">
+              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground leading-tight font-mono uppercase">
                 ELIMINATE THE <br className="hidden sm:inline" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-600 dark:to-emerald-400">
                   $2.5 TRILLION
                 </span>{" "}
                 <br />
                 TRADE FINANCE GAP
               </h1>
-              <p className="text-slate-400 text-sm leading-relaxed max-w-xl">
+              <p className="text-muted-foreground text-sm leading-relaxed max-w-xl">
                 TrusTrove tokenizes outstanding trade obligations on Stellar.
                 SMEs secure immediate working capital at fair rates, and
                 liquidity providers earn direct yield.
@@ -87,7 +88,7 @@ export default function Home() {
 
             <HeroStats />
 
-            <div className="text-xs font-mono text-slate-400 border-l-2 border-primary pl-3">
+            <div className="text-xs font-mono text-muted-foreground border-l-2 border-primary pl-3">
               &ldquo;From invoice to USDC in minutes. Not weeks.&rdquo;
             </div>
           </div>
@@ -107,63 +108,63 @@ export default function Home() {
             >
               PROTOCOL WORKFLOW
             </p>
-            <h2 className="text-xl font-bold font-mono text-white uppercase">
+            <h2 className="text-xl font-bold font-mono text-foreground uppercase">
               HOW TRUSTROVE ELIMINATES MIDDLEMEN
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
             {/* Step 1 */}
-            <div className="bg-[#0d131a] border border-border p-5 rounded-lg relative space-y-3">
+            <div className="bg-card border border-border p-5 rounded-lg relative space-y-3">
               <div className="w-8 h-8 rounded bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mb-1">
                 <ShieldCheck className="w-4 h-4" />
               </div>
-              <h3 className="text-xs font-bold font-mono text-white uppercase tracking-wider">
+              <h3 className="text-xs font-bold font-mono text-foreground uppercase tracking-wider">
                 1. REGISTER AS SME
               </h3>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
                 Verify your business identity on-chain via the registry contract
                 to establish trusted credentials.
               </p>
             </div>
 
             {/* Step 2 */}
-            <div className="bg-[#0d131a] border border-border p-5 rounded-lg relative space-y-3">
+            <div className="bg-card border border-border p-5 rounded-lg relative space-y-3">
               <div className="w-8 h-8 rounded bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mb-1">
                 <FileCheck2 className="w-4 h-4" />
               </div>
-              <h3 className="text-xs font-bold font-mono text-white uppercase tracking-wider">
+              <h3 className="text-xs font-bold font-mono text-foreground uppercase tracking-wider">
                 2. TOKENIZE INVOICE
               </h3>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
                 Generate a unique invoice cryptographic hash on-chain
                 representing your commercial shipment.
               </p>
             </div>
 
             {/* Step 3 */}
-            <div className="bg-[#0d131a] border border-border p-5 rounded-lg relative space-y-3">
+            <div className="bg-card border border-border p-5 rounded-lg relative space-y-3">
               <div className="w-8 h-8 rounded bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mb-1">
                 <Coins className="w-4 h-4" />
               </div>
-              <h3 className="text-xs font-bold font-mono text-white uppercase tracking-wider">
+              <h3 className="text-xs font-bold font-mono text-foreground uppercase tracking-wider">
                 3. RECEIVE USDC LIQUIDITY
               </h3>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
                 Pool contract immediately funds the invoice at the agreed
                 discount rate directly into your wallet.
               </p>
             </div>
 
             {/* Step 4 */}
-            <div className="bg-[#0d131a] border border-border p-5 rounded-lg relative space-y-3">
+            <div className="bg-card border border-border p-5 rounded-lg relative space-y-3">
               <div className="w-8 h-8 rounded bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mb-1">
                 <Landmark className="w-4 h-4" />
               </div>
-              <h3 className="text-xs font-bold font-mono text-white uppercase tracking-wider">
+              <h3 className="text-xs font-bold font-mono text-foreground uppercase tracking-wider">
                 4. BUYER MATURITY SETTLEMENT
               </h3>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
                 Buyer pays full invoice face value to the pool upon due date,
                 releasing escrow and yielding LP interest.
               </p>
@@ -180,61 +181,61 @@ export default function Home() {
             >
               SYSTEM ARCHITECTURE
             </p>
-            <h2 className="text-xl font-bold font-mono text-white uppercase">
+            <h2 className="text-xl font-bold font-mono text-foreground uppercase">
               SOROBAN SMART CONTRACT PIPELINE
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
             {/* Pillar 1 */}
-            <div className="bg-[#0d131a] border border-border p-6 rounded-lg space-y-4">
+            <div className="bg-card border border-border p-6 rounded-lg space-y-4">
               <div className="flex items-center gap-2 border-b border-border/40 pb-3">
                 <Database className="w-4 h-4 text-primary" />
-                <h3 className="text-xs font-bold font-mono text-white uppercase tracking-wider">
+                <h3 className="text-xs font-bold font-mono text-foreground uppercase tracking-wider">
                   REGISTRY_CONTRACT
                 </h3>
               </div>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 Manages decentralized profiles and KYC verification status for
                 issuers and buyers.
               </p>
-              <div className="bg-[#080c10] border border-border/40 p-2.5 rounded text-[10px] font-mono flex justify-between text-slate-500">
+              <div className="bg-background border border-border/40 p-2.5 rounded text-[10px] font-mono flex justify-between text-muted-foreground">
                 <span>VERIFIED ISSUERS:</span>
                 <PillarStat kind="issuers" />
               </div>
             </div>
 
             {/* Pillar 2 */}
-            <div className="bg-[#0d131a] border border-border p-6 rounded-lg space-y-4">
+            <div className="bg-card border border-border p-6 rounded-lg space-y-4">
               <div className="flex items-center gap-2 border-b border-border/40 pb-3">
                 <Layers className="w-4 h-4 text-primary" />
-                <h3 className="text-xs font-bold font-mono text-white uppercase tracking-wider">
+                <h3 className="text-xs font-bold font-mono text-foreground uppercase tracking-wider">
                   INVOICE_CONTRACT
                 </h3>
               </div>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 Stores tokenized invoices, discount rates, status lifecycle
                 events, and compliance signatures.
               </p>
-              <div className="bg-[#080c10] border border-border/40 p-2.5 rounded text-[10px] font-mono flex justify-between text-slate-500">
+              <div className="bg-background border border-border/40 p-2.5 rounded text-[10px] font-mono flex justify-between text-muted-foreground">
                 <span>TOTAL OBLIGATIONS:</span>
                 <PillarStat kind="invoices" />
               </div>
             </div>
 
             {/* Pillar 3 */}
-            <div className="bg-[#0d131a] border border-border p-6 rounded-lg space-y-4">
+            <div className="bg-card border border-border p-6 rounded-lg space-y-4">
               <div className="flex items-center gap-2 border-b border-border/40 pb-3">
                 <ArrowRightLeft className="w-4 h-4 text-primary" />
-                <h3 className="text-xs font-bold font-mono text-white uppercase tracking-wider">
+                <h3 className="text-xs font-bold font-mono text-foreground uppercase tracking-wider">
                   POOL & ESCROW
                 </h3>
               </div>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 Controls USDC liquidity deposits, share-based yield parameters,
                 and locks obligations securely in escrow.
               </p>
-              <div className="bg-[#080c10] border border-border/40 p-2.5 rounded text-[10px] font-mono flex justify-between text-slate-500">
+              <div className="bg-background border border-border/40 p-2.5 rounded text-[10px] font-mono flex justify-between text-muted-foreground">
                 <span>UTILIZATION RATE:</span>
                 <PillarStat kind="utilization" />
               </div>
@@ -251,7 +252,7 @@ export default function Home() {
             >
               FINANCIAL FEASIBILITY
             </p>
-            <h2 className="text-lg font-bold font-mono text-white uppercase">
+            <h2 className="text-lg font-bold font-mono text-foreground uppercase">
               INTERACTIVE ECONOMIC COMPILER
             </h2>
           </div>
@@ -260,7 +261,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full border-t border-border bg-[#080c10] py-8 text-center text-xs font-mono text-slate-600">
+      <footer className="w-full border-t border-border bg-background py-8 text-center text-xs font-mono text-muted-foreground">
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <span>© 2026 TRUSTROVE PROTOCOL — VERIFIED TRADE FINANCE</span>
           <div className="flex gap-4">

@@ -16,6 +16,7 @@ import (
 	"trusttrove/indexer/config"
 	"trusttrove/indexer/db"
 
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stellar/go-stellar-sdk/keypair"
 )
 
@@ -152,6 +153,66 @@ func TestPollEvents_EmptyEventsReturnsLatestPlusOne(t *testing.T) {
 	if got != latestLedger+1 {
 		t.Errorf("expected latest+1 = %d, got %d", latestLedger+1, got)
 	}
+}
+
+func TestPollEvents_UpdatesLedgerMetrics(t *testing.T) {
+	const (
+		startLedger       int32 = 100
+		latestLedger      int32 = 250
+		confirmationDepth       = 3
+		wantProcessed           = latestLedger - confirmationDepth // 247
+	)
+
+	server := stubSorobanRPC(t, func(method string) (any, int) {
+		if method != "getEvents" {
+			t.Errorf("unexpected RPC method: %s", method)
+			return nil, http.StatusOK
+		}
+		return map[string]any{
+			"events":       []any{},
+			"latestLedger": uint32(latestLedger),
+			"cursor":       "",
+		}, http.StatusOK
+	})
+
+	l := newTestEventListener(t, func(c *config.Config) {
+		c.SorobanRPCURL = server.URL
+		c.InvoiceContractID = "CA4O3MR7LWHRSUDBNU6FY6UDFFYBN7TGBZXBDZB4OYYXFYXIFJ6RJF6B"
+		c.IndexerConfirmationDepth = confirmationDepth
+	})
+
+	if _, err := l.pollEvents(context.Background(), startLedger); err != nil {
+		t.Fatalf("pollEvents: %v", err)
+	}
+
+	if got := gaugeValue(t, "trustrove_listener_last_ledger"); got != float64(wantProcessed) {
+		t.Errorf("listener_last_ledger: got %v, want %d", got, wantProcessed)
+	}
+	if got := gaugeValue(t, "stellar_ledger_lag"); got != float64(confirmationDepth) {
+		t.Errorf("stellar_ledger_lag: got %v, want %d", got, confirmationDepth)
+	}
+}
+
+// gaugeValue reads the current value of an unlabelled gauge from the default
+// Prometheus registry.
+func gaugeValue(t *testing.T, name string) float64 {
+	t.Helper()
+	families, err := prometheus.DefaultGatherer.Gather()
+	if err != nil {
+		t.Fatalf("gather metrics: %v", err)
+	}
+	for _, family := range families {
+		if family.GetName() != name {
+			continue
+		}
+		for _, metric := range family.GetMetric() {
+			if metric.GetGauge() != nil {
+				return metric.GetGauge().GetValue()
+			}
+		}
+	}
+	t.Fatalf("metric %q not found", name)
+	return 0
 }
 
 func TestPollEvents_RPCErrorIsPropagated(t *testing.T) {
