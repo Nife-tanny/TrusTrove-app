@@ -346,7 +346,7 @@ export default function SMEDashboard() {
               {t("stats.repaid.label")}
             </span>
             <span className="text-lg font-bold text-emerald-700 dark:text-emerald-400 block mt-1">
-              {invoices.filter((i) => i.status === "Repaid").length}
+              {totalRepaid}
             </span>
             <span className="text-[9px] text-muted-foreground">
               {t("stats.repaid.hint")}
