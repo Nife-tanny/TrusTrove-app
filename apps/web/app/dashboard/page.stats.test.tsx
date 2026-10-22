@@ -1,7 +1,7 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { renderWithProviders } from "@/test-utils/renderWithProviders";
 
 vi.mock("@/store/wallet", () => {
   const state = {
@@ -198,14 +198,7 @@ const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
 import SMEDashboard from "./page";
 
 function renderDashboard() {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <SMEDashboard />
-    </QueryClientProvider>,
-  );
+  return renderWithProviders(<SMEDashboard />);
 }
 
 function statsSnapshot() {

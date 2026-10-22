@@ -55,6 +55,7 @@ export default function SMEDashboard() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { isVerified } = useProfile();
+  const { stats } = useInvoiceStats(address || undefined);
   const createModalRef = useFocusTrap<HTMLDivElement>(showCreateModal, () =>
     setShowCreateModal(false),
   );
@@ -345,7 +346,7 @@ export default function SMEDashboard() {
               {t("stats.repaid.label")}
             </span>
             <span className="text-lg font-bold text-emerald-700 dark:text-emerald-400 block mt-1">
-              {invoices.filter((i) => i.status === "Repaid").length}
+              {totalRepaid}
             </span>
             <span className="text-[9px] text-muted-foreground">
               {t("stats.repaid.hint")}

@@ -50,14 +50,23 @@ vi.mock("@/store/wallet", () => ({
 vi.mock("@/hooks/useProfile", () => ({
   useProfile: () => ({ isVerified: state.isVerified }),
 }));
-vi.mock("@/hooks/useInvoices", () => ({
-  useInvoiceList: () => ({
-    invoices: state.invoices,
-    isLoading: false,
-    total: state.invoices.length,
-    totalPages: 1,
-  }),
-}));
+vi.mock("@/hooks/useInvoices", async () => {
+  const { computeInvoiceStats } = await vi.importActual<
+    typeof import("@/hooks/useInvoices")
+  >("@/hooks/useInvoices");
+  return {
+    useInvoiceList: () => ({
+      invoices: state.invoices,
+      isLoading: false,
+      total: state.invoices.length,
+      totalPages: 1,
+    }),
+    useInvoiceStats: () => ({
+      stats: computeInvoiceStats(state.invoices),
+      isLoading: false,
+    }),
+  };
+});
 vi.mock("@/hooks/useEvents", () => ({
   useRecentEvents: (...args: unknown[]) => {
     state.eventsCalls.push(args);
