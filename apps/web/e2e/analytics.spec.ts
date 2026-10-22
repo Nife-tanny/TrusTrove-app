@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/network";
 
 const statsPayload = {
   total_usdc_financed: "1250000",

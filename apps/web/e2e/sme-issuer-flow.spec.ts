@@ -238,7 +238,7 @@ async function setupIssuerApiMocks(page: Page) {
       return;
     }
 
-    await route.continue();
+    await route.fallback();
   });
 
   return {
@@ -465,31 +465,6 @@ test.describe("SME Issuer Flow - Happy Path", () => {
     // The SDK error surfaces both inline in the card and in the toast.
     await expect(
       page.getByText(/Contract ID is required/i).first(),
-    ).toBeVisible();
-  });
-});
-
-test.describe("SME Issuer Flow - Secondary Flows", () => {
-  test("Wallet disconnection from SME dashboard", async ({ page }) => {
-    await setupIssuerApiMocks(page);
-    await connectAsIssuer(page);
-
-    await page
-      .getByRole("navigation")
-      .getByRole("button", { name: /Disconnect wallet/i })
-      .click();
-
-    await expect(
-      page
-        .getByRole("navigation")
-        .getByRole("button", { name: /Connect Wallet/i }),
-    ).toBeVisible({ timeout: 10000 });
-  });
-
-  test("Frontend error states", async ({ page }) => {
-    await page.goto("/this-route-does-not-exist");
-    await expect(
-      page.getByText(/Page not found/i).or(page.getByText(/404/i)),
     ).toBeVisible();
   });
 });

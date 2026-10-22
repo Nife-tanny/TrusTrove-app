@@ -145,6 +145,8 @@ cd indexer && go test -race ./...
 
 The specs live in `apps/web/e2e/` and run in Chromium against the Next.js app. Every backend call (indexer API, Horizon, Soroban RPC) and the Freighter wallet are mocked inside the specs, so no indexer, database or browser extension is needed.
 
+Import `test` from `e2e/fixtures/freighter.ts` (mocked wallet) or `e2e/fixtures/network.ts` (no wallet), not straight from `@playwright/test`. Both abort any request to an origin other than the app that the spec does not mock with `page.route`, so a missing mock fails the request instead of reaching testnet.
+
 ```bash
 # One-time: download the Chromium build Playwright uses
 # (on Linux, add --with-deps to also install the system libraries)
