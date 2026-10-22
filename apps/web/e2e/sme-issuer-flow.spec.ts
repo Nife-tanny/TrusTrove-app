@@ -418,7 +418,9 @@ test.describe("SME Issuer Flow - Happy Path", () => {
     ).toBeVisible();
   });
 
-  test("reports a failed listing when no invoice contract is configured", async ({
+  // FIXME: CI builds with the testnet contract IDs, so the "Contract ID is
+  // required" path is never reached. Tracked in https://github.com/TrusTrove/TrusTrove-app/issues/1175
+  test.fixme("reports a failed listing when no invoice contract is configured", async ({
     page,
   }) => {
     await setupStellarNetworkMocks(page);
