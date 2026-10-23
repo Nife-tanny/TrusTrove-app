@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { IntlTestProvider } from "@/test-utils/renderWithProviders";
 
 vi.mock("@/store/wallet", () => {
   const state = {
@@ -203,7 +204,9 @@ function renderDashboard() {
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <SMEDashboard />
+      <IntlTestProvider>
+        <SMEDashboard />
+      </IntlTestProvider>
     </QueryClientProvider>,
   );
 }

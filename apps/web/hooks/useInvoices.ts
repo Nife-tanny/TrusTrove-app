@@ -110,8 +110,7 @@ export function computeInvoiceStats(invoices: Invoice[]): InvoiceStats {
 export function useInvoiceStats(issuer?: string) {
   const statsQuery = useQuery<InvoiceStats>({
     queryKey: ["invoiceStats", issuer],
-    queryFn: async () =>
-      computeInvoiceStats(await getAllInvoices({ issuer })),
+    queryFn: async () => computeInvoiceStats(await getAllInvoices({ issuer })),
     enabled: !!issuer,
     refetchInterval: 15000,
     staleTime: 15000,

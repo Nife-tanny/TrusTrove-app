@@ -57,6 +57,15 @@ vi.mock("@/hooks/useInvoices", () => ({
     total: state.invoices.length,
     totalPages: 1,
   }),
+  useInvoiceStats: () => ({
+    stats: {
+      totalInvoicesCreated: state.invoices.length,
+      totalListed: 0,
+      totalFundedActive: 0,
+      totalRepaid: 0,
+      totalFunded: 0n,
+    },
+  }),
 }));
 vi.mock("@/hooks/useEvents", () => ({
   useRecentEvents: (...args: unknown[]) => {

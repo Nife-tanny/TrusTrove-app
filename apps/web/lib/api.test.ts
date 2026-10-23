@@ -360,9 +360,7 @@ describe("API functions", () => {
     });
 
     it("should return an empty array when there are no invoices", async () => {
-      mockFetch.mockResolvedValueOnce(
-        pageResponse([], 1, 1),
-      );
+      mockFetch.mockResolvedValueOnce(pageResponse([], 1, 1));
 
       const result = await getAllInvoices({ issuer: "GISSUE" });
 

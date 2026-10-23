@@ -47,6 +47,7 @@ export default function SMEDashboard() {
     page: invoicePage,
     limit: invoiceLimit,
   });
+  const { stats } = useInvoiceStats(address || undefined);
   // Scoped to the connected issuer, like the invoice table above it: the panel
   // is this SME's own activity log, not the protocol's (#1115).
   const { events, isLoading: eventsLoading } = useRecentEvents(10, {
@@ -345,7 +346,7 @@ export default function SMEDashboard() {
               {t("stats.repaid.label")}
             </span>
             <span className="text-lg font-bold text-emerald-700 dark:text-emerald-400 block mt-1">
-              {invoices.filter((i) => i.status === "Repaid").length}
+              {totalRepaid}
             </span>
             <span className="text-[9px] text-muted-foreground">
               {t("stats.repaid.hint")}
