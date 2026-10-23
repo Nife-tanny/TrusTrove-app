@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"trusttrove/indexer/api"
 	"trusttrove/indexer/db"
 	"trusttrove/indexer/netguard"
 )
@@ -216,6 +217,7 @@ func (w *DeliveryWorker) attemptDelivery(ctx context.Context, delivery *db.Webho
 		if dbErr := db.MarkDeliverySuccess(writeCtx, delivery.ID, resp.StatusCode, bodyStr); dbErr != nil {
 			slog.Error("webhook worker: mark success failed", "delivery_id", delivery.ID, "error", dbErr)
 		}
+		api.WebhookDeliveriesTotal.WithLabelValues("delivered").Inc()
 		slog.Info("webhook worker: delivered", "delivery_id", delivery.ID, "endpoint", delivery.EndpointURL, "status", resp.StatusCode)
 		return
 	}
@@ -241,6 +243,7 @@ func (w *DeliveryWorker) handleFailure(ctx context.Context, delivery *db.Webhook
 		if err := db.MarkDeliveryDeadLetter(writeCtx, delivery.ID, errMsg); err != nil {
 			slog.Error("webhook worker: mark dead_letter failed", "delivery_id", delivery.ID, "error", err)
 		}
+		api.WebhookDeliveriesTotal.WithLabelValues("dead_lettered").Inc()
 		slog.Error("webhook worker: delivery dead-lettered", "delivery_id", delivery.ID, "endpoint", delivery.EndpointURL)
 		return
 	}
@@ -253,6 +256,7 @@ func (w *DeliveryWorker) handleFailure(ctx context.Context, delivery *db.Webhook
 	if err := db.MarkDeliveryRetry(writeCtx, delivery.ID, nextAt, statusCode, errMsg); err != nil {
 		slog.Error("webhook worker: mark retry failed", "delivery_id", delivery.ID, "error", err)
 	}
+	api.WebhookDeliveriesTotal.WithLabelValues("retried").Inc()
 }
 
 const (

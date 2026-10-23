@@ -22,11 +22,11 @@ export function PillarStat({ kind }: { kind: PillarStatKind }) {
     return (
       <>
         {isStatsLoading ? (
-          <span className="text-white font-bold animate-pulse">--.-%</span>
+          <span className="text-foreground font-bold animate-pulse">--.-%</span>
         ) : statsError ? (
-          <span className="text-white font-bold">--.-%</span>
+          <span className="text-foreground font-bold">--.-%</span>
         ) : (
-          <span className="text-white font-bold">
+          <span className="text-foreground font-bold">
             {(stats?.utilizationRateBps || 0) / 100}% capacity
           </span>
         )}

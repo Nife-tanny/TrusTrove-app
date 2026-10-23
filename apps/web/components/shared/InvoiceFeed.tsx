@@ -98,9 +98,9 @@ export function InvoiceFeed() {
   return (
     <section
       aria-labelledby={FEED_HEADING_ID}
-      className="border border-border/80 bg-[#0d131a] rounded-lg overflow-hidden h-[340px] flex flex-col"
+      className="border border-border/80 bg-card rounded-lg overflow-hidden h-[340px] flex flex-col"
     >
-      <div className="bg-[#080c10] border-b border-border/40 px-4 py-3 flex items-center justify-between">
+      <div className="bg-background border-b border-border/40 px-4 py-3 flex items-center justify-between">
         <h2
           id={FEED_HEADING_ID}
           className="text-[10px] font-bold font-mono tracking-widest text-primary uppercase flex items-center gap-1.5"
@@ -108,7 +108,7 @@ export function InvoiceFeed() {
           <Zap className="w-3.5 h-3.5" aria-hidden="true" />
           Live Financing Feed
         </h2>
-        <span className="text-[9px] font-mono text-slate-500 uppercase">
+        <span className="text-[9px] font-mono text-muted-foreground uppercase">
           Realtime testnet activity
         </span>
       </div>
@@ -121,8 +121,11 @@ export function InvoiceFeed() {
             role="status"
             className="flex flex-col items-center justify-center h-full text-center gap-2"
           >
-            <Activity className="w-5 h-5 text-slate-600" aria-hidden="true" />
-            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+            <Activity
+              className="w-5 h-5 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
               Awaiting on-chain activity
             </span>
           </div>
@@ -152,17 +155,17 @@ export function InvoiceFeed() {
                         stiffness: 350,
                         damping: 25,
                       }}
-                      className="bg-[#080c10] border border-border/40 p-3 rounded flex items-center justify-between gap-4 w-full"
+                      className="bg-background border border-border/40 p-3 rounded flex items-center justify-between gap-4 w-full"
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <div className="text-primary shrink-0">
                           <Icon className="w-4 h-4" aria-hidden="true" />
                         </div>
                         <div className="min-w-0">
-                          <span className="text-xs font-mono font-bold text-slate-300 block truncate">
+                          <span className="text-xs font-mono font-bold text-foreground block truncate">
                             {item.label}
                           </span>
-                          <span className="text-[10px] font-mono text-slate-400 block">
+                          <span className="text-[10px] font-mono text-muted-foreground block">
                             {item.time}
                           </span>
                         </div>

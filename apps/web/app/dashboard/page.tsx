@@ -9,7 +9,7 @@ import { InvoiceTable } from "@/components/invoice/InvoiceTable";
 import { InvoiceCard } from "@/components/invoice/InvoiceCard";
 import { InvoiceFormLoader } from "@/components/invoice/InvoiceFormLoader";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
-import { useInvoiceList } from "@/hooks/useInvoices";
+import { useInvoiceList, useInvoiceStats } from "@/hooks/useInvoices";
 import { useRecentEvents } from "@/hooks/useEvents";
 import { useWalletStore } from "@/store/wallet";
 import { useProfile } from "@/hooks/useProfile";
@@ -48,6 +48,7 @@ export default function SMEDashboard() {
     page: invoicePage,
     limit: invoiceLimit,
   });
+  const { stats } = useInvoiceStats(address || undefined);
   // Scoped to the connected issuer, like the invoice table above it: the panel
   // is this SME's own activity log, not the protocol's (#1115).
   const { events, isLoading: eventsLoading } = useRecentEvents(10, {
@@ -86,16 +87,13 @@ export default function SMEDashboard() {
     setSelectedInvoice(null);
   }, [invoicePage, invoiceLimit, address]);
 
-  // Compute stats
-  const totalFunded = invoices.reduce((sum, inv) => sum + inv.fundedAmount, 0n);
-  const totalInvoicesCreated = invoices.length;
-  const totalListed = invoices.filter((i) => i.status === "Listed").length;
-  const totalFundedActive = invoices.filter(
-    (i) =>
-      i.status === "Funded" ||
-      i.status === "Active" ||
-      i.status === "Confirmed",
-  ).length;
+  const {
+    totalFunded,
+    totalInvoicesCreated,
+    totalListed,
+    totalFundedActive,
+    totalRepaid,
+  } = stats;
 
   const handlePageChange = (page: number) => {
     setInvoicePage(page);
@@ -188,10 +186,10 @@ export default function SMEDashboard() {
           <div className="bg-primary/10 border border-primary/20 p-4 rounded-lg mb-6 shadow-[0_0_20px_rgba(0,212,170,0.15)]">
             <Layers className="w-12 h-12 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold font-mono tracking-wider text-white uppercase mb-2">
+          <h1 className="text-2xl font-bold font-mono tracking-wider text-foreground uppercase mb-2">
             {t("connectPrompt.title")}
           </h1>
-          <p className="text-slate-400 text-xs font-mono mb-8 leading-relaxed">
+          <p className="text-muted-foreground text-xs font-mono mb-8 leading-relaxed">
             {t("connectPrompt.body")}
           </p>
           <WalletConnect />
@@ -206,10 +204,10 @@ export default function SMEDashboard() {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border/40 pb-5">
           <div>
-            <h1 className="text-xl font-bold font-mono tracking-wider uppercase text-white">
+            <h1 className="text-xl font-bold font-mono tracking-wider uppercase text-foreground">
               {t("header.title")}
             </h1>
-            <p className="text-slate-500 text-xs font-mono mt-1">
+            <p className="text-muted-foreground text-xs font-mono mt-1">
               {t("header.operator", {
                 address: address ? truncateAddress(address) : "",
                 role: role.toUpperCase(),
@@ -217,22 +215,38 @@ export default function SMEDashboard() {
             </p>
           </div>
 
-          <button
-            onClick={() => {
-              if (!isVerified) return;
-              setShowCreateModal(true);
-            }}
-            disabled={!isVerified}
-            className={`font-bold uppercase tracking-wider text-xs rounded px-4 py-2.5 flex items-center gap-1.5 transition-all ${
-              isVerified
-                ? "bg-primary hover:bg-primary/90 text-black shadow-[0_0_15px_rgba(0,212,170,0.1)]"
-                : "bg-neutral-800 text-slate-500 border border-neutral-700 cursor-not-allowed opacity-60"
-            }`}
-            title={!isVerified ? t("header.createInvoiceLocked") : undefined}
-          >
-            <Plus className="w-4 h-4" />
-            <span>{t("header.createInvoice")}</span>
-          </button>
+          <div className="flex flex-col items-start md:items-end gap-1.5">
+            <button
+              onClick={() => {
+                if (!isVerified) return;
+                setShowCreateModal(true);
+              }}
+              disabled={!isVerified}
+              className={`font-bold uppercase tracking-wider text-xs rounded px-4 py-2.5 flex items-center gap-1.5 transition-all ${
+                isVerified
+                  ? "bg-primary hover:bg-primary/95 text-primary-foreground shadow-[0_0_15px_rgba(0,212,170,0.1)]"
+                  : "bg-muted text-muted-foreground border border-border cursor-not-allowed opacity-60"
+              }`}
+              title={!isVerified ? t("header.createInvoiceLocked") : undefined}
+              aria-describedby={
+                !isVerified ? "create-invoice-lock-reason" : undefined
+              }
+            >
+              <Plus className="w-4 h-4" />
+              <span>{t("header.createInvoice")}</span>
+            </button>
+            {/* The lock reason must not live in the button's title alone:
+                title is unavailable to touch and is only exposed on hover by
+                pointer-using screen readers (#1010). */}
+            {!isVerified && (
+              <p
+                id="create-invoice-lock-reason"
+                className="text-[10px] font-mono text-muted-foreground text-right"
+              >
+                {t("header.createInvoiceLocked")}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Onboarding checklist — shown only while the user is unverified */}
@@ -245,10 +259,10 @@ export default function SMEDashboard() {
                 </span>
               </div>
               <div>
-                <h3 className="text-sm font-bold font-mono tracking-wider text-white uppercase">
+                <h3 className="text-sm font-bold font-mono tracking-wider text-foreground uppercase">
                   {t("checklist.title")}
                 </h3>
-                <p className="text-[10px] text-slate-500 font-mono leading-relaxed">
+                <p className="text-[10px] text-muted-foreground font-mono leading-relaxed">
                   {t("checklist.description")}
                 </p>
               </div>
@@ -258,10 +272,10 @@ export default function SMEDashboard() {
             <div className="flex items-center gap-3 p-3 rounded-lg border border-primary/20 bg-primary/5">
               <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
               <div className="flex-1 min-w-0">
-                <span className="text-xs font-bold font-mono text-white">
+                <span className="text-xs font-bold font-mono text-foreground">
                   {t("checklist.connectWallet.title")}
                 </span>
-                <p className="text-[10px] text-slate-500 truncate">
+                <p className="text-[10px] text-muted-foreground truncate">
                   {t("checklist.connectWallet.description")}
                 </p>
               </div>
@@ -272,32 +286,32 @@ export default function SMEDashboard() {
 
             {/* Step 2: Register Profile — pending action */}
             <div className="flex items-center gap-3 p-3 rounded-lg border border-amber-500/20 bg-amber-500/5">
-              <Circle className="w-5 h-5 text-amber-400 shrink-0" />
+              <Circle className="w-5 h-5 text-amber-700 dark:text-amber-400 shrink-0" />
               <div className="flex-1 min-w-0">
-                <span className="text-xs font-bold font-mono text-amber-400">
+                <span className="text-xs font-bold font-mono text-amber-700 dark:text-amber-400">
                   {t("checklist.registerProfile.title")}
                 </span>
-                <p className="text-[10px] text-slate-500 truncate">
+                <p className="text-[10px] text-muted-foreground truncate">
                   {t("checklist.registerProfile.description")}
                 </p>
               </div>
-              <span className="text-[9px] font-bold font-mono text-amber-400 uppercase shrink-0">
+              <span className="text-[9px] font-bold font-mono text-amber-700 dark:text-amber-400 uppercase shrink-0">
                 {t("checklist.registerProfile.status")}
               </span>
             </div>
 
             {/* Step 3: Create Invoice — locked behind verification */}
             <div className="flex items-center gap-3 p-3 rounded-lg border border-border/40 bg-card">
-              <Lock className="w-5 h-5 text-slate-600 shrink-0" />
+              <Lock className="w-5 h-5 text-muted-foreground shrink-0" />
               <div className="flex-1 min-w-0">
-                <span className="text-xs font-bold font-mono text-slate-400">
+                <span className="text-xs font-bold font-mono text-muted-foreground">
                   {t("checklist.createInvoice.title")}
                 </span>
-                <p className="text-[10px] text-slate-500 truncate">
+                <p className="text-[10px] text-muted-foreground truncate">
                   {t("checklist.createInvoice.description")}
                 </p>
               </div>
-              <span className="text-[9px] font-bold font-mono text-slate-600 uppercase shrink-0">
+              <span className="text-[9px] font-bold font-mono text-muted-foreground uppercase shrink-0">
                 {t("checklist.createInvoice.status")}
               </span>
             </div>
@@ -305,7 +319,7 @@ export default function SMEDashboard() {
             {/* CTA to profile registration page */}
             <Link
               href="/profile"
-              className="w-full mt-2 bg-primary hover:bg-primary/90 text-black font-bold uppercase tracking-wider text-xs rounded px-4 py-2.5 flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(0,212,170,0.1)] transition-all"
+              className="w-full mt-2 bg-primary hover:bg-primary/95 text-primary-foreground font-bold uppercase tracking-wider text-xs rounded px-4 py-2.5 flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(0,212,170,0.1)] transition-all"
             >
               <span>{t("checklist.cta")}</span>
             </Link>
@@ -315,61 +329,61 @@ export default function SMEDashboard() {
         {/* Stats Row */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           <div className="bg-card border border-border rounded-lg p-4 font-mono">
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
+            <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block">
               {t("stats.created.label")}
             </span>
-            <span className="text-lg font-bold text-white block mt-1">
+            <span className="text-lg font-bold text-foreground block mt-1">
               {totalInvoicesCreated}
             </span>
-            <span className="text-[9px] text-slate-600">
+            <span className="text-[9px] text-muted-foreground">
               {t("stats.created.hint")}
             </span>
           </div>
 
           <div className="bg-card border border-border rounded-lg p-4 font-mono">
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
+            <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block">
               {t("stats.listed.label")}
             </span>
             <span className="text-lg font-bold text-primary block mt-1">
               {totalListed}
             </span>
-            <span className="text-[9px] text-slate-600">
+            <span className="text-[9px] text-muted-foreground">
               {t("stats.listed.hint")}
             </span>
           </div>
 
           <div className="bg-card border border-border rounded-lg p-4 font-mono">
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
+            <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block">
               {t("stats.fundedActive.label")}
             </span>
-            <span className="text-lg font-bold text-sky-400 block mt-1">
+            <span className="text-lg font-bold text-sky-700 dark:text-sky-400 block mt-1">
               {totalFundedActive}
             </span>
-            <span className="text-[9px] text-slate-600">
+            <span className="text-[9px] text-muted-foreground">
               {t("stats.fundedActive.hint")}
             </span>
           </div>
 
           <div className="bg-card border border-border rounded-lg p-4 font-mono">
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
+            <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block">
               {t("stats.repaid.label")}
             </span>
-            <span className="text-lg font-bold text-emerald-400 block mt-1">
-              {invoices.filter((i) => i.status === "Repaid").length}
+            <span className="text-lg font-bold text-emerald-700 dark:text-emerald-400 block mt-1">
+              {totalRepaid}
             </span>
-            <span className="text-[9px] text-slate-600">
+            <span className="text-[9px] text-muted-foreground">
               {t("stats.repaid.hint")}
             </span>
           </div>
 
           <div className="bg-card border border-border rounded-lg p-4 font-mono md:col-span-1 lg:col-span-1">
-            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
+            <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block">
               {t("stats.financed.label")}
             </span>
-            <span className="text-lg font-bold text-white block mt-1 truncate">
+            <span className="text-lg font-bold text-foreground block mt-1 truncate">
               {formatAmount(totalFunded)}
             </span>
-            <span className="text-[9px] text-slate-600">
+            <span className="text-[9px] text-muted-foreground">
               {t("stats.financed.hint")}
             </span>
           </div>
@@ -379,7 +393,7 @@ export default function SMEDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Main Invoices Section (Left / Center) */}
           <div className="lg:col-span-8 space-y-6">
-            <h2 className="text-sm font-bold font-mono tracking-wider uppercase text-white">
+            <h2 className="text-sm font-bold font-mono tracking-wider uppercase text-foreground">
               {t("invoices.title")}
             </h2>
 
@@ -416,12 +430,12 @@ export default function SMEDashboard() {
             ) : (
               <ErrorBoundary context="ActivityLog">
                 <div className="bg-card border border-border rounded-lg p-5 space-y-4">
-                  <h3 className="text-xs font-bold font-mono text-white uppercase tracking-wider border-b border-border/40 pb-2">
+                  <h3 className="text-xs font-bold font-mono text-foreground uppercase tracking-wider border-b border-border/40 pb-2">
                     {t("activity.title")}
                   </h3>
                   <div className="space-y-3 font-mono text-xs">
                     {events.length === 0 && (
-                      <p className="text-slate-500 text-[10px] py-4 text-center">
+                      <p className="text-muted-foreground text-[10px] py-4 text-center">
                         {t("activity.empty")}
                       </p>
                     )}
@@ -436,11 +450,11 @@ export default function SMEDashboard() {
                             <span className="text-primary font-bold">
                               {display.type}
                             </span>
-                            <p className="text-[10px] text-slate-400">
+                            <p className="text-[10px] text-muted-foreground">
                               {display.details}
                             </p>
                           </div>
-                          <span className="text-[9px] text-slate-500 text-right">
+                          <span className="text-[9px] text-muted-foreground text-right">
                             {display.time}
                           </span>
                         </div>
@@ -457,7 +471,7 @@ export default function SMEDashboard() {
             <h2
               ref={consoleHeadingRef}
               tabIndex={-1}
-              className="text-sm font-bold font-mono tracking-wider uppercase text-white"
+              className="text-sm font-bold font-mono tracking-wider uppercase text-foreground"
             >
               {t("console.title")}
             </h2>
@@ -478,7 +492,7 @@ export default function SMEDashboard() {
                     className="space-y-4"
                   >
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-bold font-mono text-slate-500 uppercase">
+                      <span className="text-[10px] font-bold font-mono text-muted-foreground uppercase">
                         {t("console.selectedDetails")}
                       </span>
                       <button
@@ -497,13 +511,13 @@ export default function SMEDashboard() {
                     {/* Additional invoice details */}
                     <Link
                       href={`/invoice/${selectedInvoice.id}`}
-                      className="w-full bg-[#0d131a] border border-border hover:border-primary/50 text-slate-300 hover:text-white font-bold text-xs uppercase tracking-wider py-2 rounded text-center block font-mono"
+                      className="w-full bg-card border border-border hover:border-primary/50 text-foreground font-bold text-xs uppercase tracking-wider py-2 rounded text-center block font-mono"
                     >
                       {t("console.viewAuditLedger")}
                     </Link>
                   </motion.div>
                 ) : (
-                  <div className="bg-card/45 border border-dashed border-border rounded-lg p-6 text-center text-slate-500 font-mono text-[10px] py-20 uppercase tracking-wider">
+                  <div className="bg-card/45 border border-dashed border-border rounded-lg p-6 text-center text-muted-foreground font-mono text-[10px] py-20 uppercase tracking-wider">
                     {t("console.emptyState")}
                   </div>
                 )}
@@ -521,7 +535,7 @@ export default function SMEDashboard() {
           aria-modal="true"
           aria-label={t("createModal.label")}
           tabIndex={-1}
-          className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-[#080c10]/95 backdrop-blur-sm p-0 md:p-4"
+          className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-background/95 backdrop-blur-sm p-0 md:p-4"
           onClick={() => setShowCreateModal(false)}
           onKeyDown={(event) => {
             if (event.key === "Escape") setShowCreateModal(false);
@@ -532,12 +546,12 @@ export default function SMEDashboard() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-5 pt-4 pb-2 border-b border-border/40 shrink-0">
-              <span className="text-[10px] font-bold font-mono text-slate-500 uppercase tracking-wider">
+              <span className="text-[10px] font-bold font-mono text-muted-foreground uppercase tracking-wider">
                 {t("createModal.title")}
               </span>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-slate-500 hover:text-white font-bold font-mono text-xs uppercase px-2 py-1 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                className="text-muted-foreground hover:text-foreground font-bold font-mono text-xs uppercase px-2 py-1 min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 {t("createModal.close")}
               </button>

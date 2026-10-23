@@ -56,11 +56,11 @@ function NotificationPreferences({ address }: { address: string }) {
   return (
     <div className="mt-8 space-y-4">
       <div className="border-b border-border/40 pb-2">
-        <h2 className="text-sm font-bold font-mono tracking-wider uppercase text-white flex items-center gap-2">
+        <h2 className="text-sm font-bold font-mono tracking-wider uppercase text-foreground flex items-center gap-2">
           <BellRing className="w-4 h-4 text-primary" />
           Notification Preferences
         </h2>
-        <p className="text-slate-500 text-[10px] font-mono mt-1">
+        <p className="text-muted-foreground text-[10px] font-mono mt-1">
           Choose which on-chain events trigger in-app notifications.
         </p>
       </div>
@@ -71,7 +71,7 @@ function NotificationPreferences({ address }: { address: string }) {
             key={category}
             className="flex items-center justify-between p-3 rounded-lg border border-border bg-card"
           >
-            <span className="text-slate-300 font-bold">{category}</span>
+            <span className="text-foreground font-bold">{category}</span>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
@@ -80,7 +80,7 @@ function NotificationPreferences({ address }: { address: string }) {
                 checked={prefs[category] !== false}
                 onChange={() => toggleCategory(category)}
               />
-              <div className="w-9 h-5 bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+              <div className="w-9 h-5 bg-muted-foreground peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-card rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card after:border-border after:border after:rounded-full after:h-4 after:w-4 after:transition-all motion-reduce:after:transition-none peer-checked:bg-primary"></div>
             </label>
           </div>
         ))}
@@ -183,10 +183,10 @@ export default function ProfilePage() {
           <div className="bg-primary/10 border border-primary/20 p-4 rounded-lg mb-6 shadow-[0_0_20px_rgba(0,212,170,0.15)]">
             <Building2 className="w-12 h-12 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold font-mono tracking-wider text-white uppercase mb-2">
+          <h1 className="text-2xl font-bold font-mono tracking-wider text-foreground uppercase mb-2">
             Connect Your Wallet
           </h1>
-          <p className="text-slate-400 text-xs font-mono mb-8 leading-relaxed">
+          <p className="text-muted-foreground text-xs font-mono mb-8 leading-relaxed">
             Connect your Freighter wallet to check your on-chain verification
             credentials, register a new business profile, or update your
             metadata.
@@ -204,10 +204,10 @@ export default function ProfilePage() {
       <div className="space-y-8 py-4 max-w-4xl mx-auto">
         {/* Header */}
         <div className="border-b border-border/40 pb-5">
-          <h1 className="text-xl font-bold font-mono tracking-wider uppercase text-white">
+          <h1 className="text-xl font-bold font-mono tracking-wider uppercase text-foreground">
             Business profile & Verification
           </h1>
-          <p className="text-slate-500 text-xs font-mono mt-1">
+          <p className="text-muted-foreground text-xs font-mono mt-1">
             Manage your on-chain corporate credentials and verification states
             on the TrusTrove Registry contract.
           </p>
@@ -217,26 +217,26 @@ export default function ProfilePage() {
           {isLoading ? (
             <div
               role="status"
-              className="bg-[#0d131a] border border-border rounded-lg p-12 flex flex-col items-center justify-center space-y-4 font-mono text-xs"
+              className="bg-card border border-border rounded-lg p-12 flex flex-col items-center justify-center space-y-4 font-mono text-xs"
             >
               <span
                 aria-hidden="true"
                 className="w-1.5 h-1.5 rounded-full bg-primary animate-ping"
               />
-              <span className="text-slate-400 uppercase tracking-widest animate-pulse">
+              <span className="text-muted-foreground uppercase tracking-widest animate-pulse">
                 Loading profile credentials...
               </span>
             </div>
           ) : profile ? (
             <div className="space-y-6">
               {/* Status Banner */}
-              <div className="bg-[#0d131a] border border-border rounded-lg p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="bg-card border border-border rounded-lg p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-start gap-4">
                   <div
                     className={`p-3 rounded-lg border ${
                       isVerified
-                        ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                        : "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                        ? "bg-success/10 border-success/30 text-success"
+                        : "bg-warning/10 border-warning/30 text-warning"
                     }`}
                   >
                     {isVerified ? (
@@ -247,22 +247,22 @@ export default function ProfilePage() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-slate-500 uppercase">
+                      <span className="text-xs font-mono text-muted-foreground uppercase">
                         Status:
                       </span>
                       <span
                         className={`text-xs font-mono font-bold uppercase ${
-                          isVerified ? "text-emerald-400" : "text-amber-400"
+                          isVerified ? "text-success" : "text-warning"
                         }`}
                       >
                         {isVerified ? "Verified Corporate" : "Pending Review"}
                       </span>
                     </div>
-                    <h2 className="text-lg font-bold font-mono text-white mt-0.5">
+                    <h2 className="text-lg font-bold font-mono text-foreground mt-0.5">
                       {profile.role === "issuer" ? "SME / Issuer" : "Buyer"}{" "}
                       Profile
                     </h2>
-                    <p className="text-xs font-mono text-slate-400 mt-1">
+                    <p className="text-xs font-mono text-muted-foreground mt-1">
                       Registered on Registry Contract • Address:{" "}
                       {address ? formatAddress(address) : "Address unavailable"}
                     </p>
@@ -281,7 +281,7 @@ export default function ProfilePage() {
                   </Button>
                   <p
                     id="metadata-update-note"
-                    className="text-[10px] font-mono text-slate-500 leading-relaxed max-w-[16rem] text-right"
+                    className="text-[10px] font-mono text-muted-foreground leading-relaxed max-w-[16rem] text-right"
                   >
                     Registration on the Registry contract is a one-time action
                     and the stored profile has no metadata fields, so an
@@ -292,27 +292,31 @@ export default function ProfilePage() {
 
               {/* Details Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-[#0d131a] border border-border rounded-lg p-6 space-y-4">
-                  <h3 className="text-xs font-bold font-mono uppercase text-slate-400 tracking-wider flex items-center gap-2">
+                <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+                  <h3 className="text-xs font-bold font-mono uppercase text-muted-foreground tracking-wider flex items-center gap-2">
                     <Building className="w-4 h-4 text-primary" />
                     Corporate Information
                   </h3>
                   <div className="space-y-3 text-xs font-mono">
                     <div className="flex justify-between py-2 border-b border-border/40">
-                      <span className="text-slate-500">Role</span>
-                      <span className="text-white uppercase font-bold">
+                      <span className="text-muted-foreground">Role</span>
+                      <span className="text-foreground uppercase font-bold">
                         {profile.role}
                       </span>
                     </div>
                     <div className="flex justify-between py-2 border-b border-border/40">
-                      <span className="text-slate-500">Wallet Address</span>
-                      <span className="text-slate-300">
+                      <span className="text-muted-foreground">
+                        Wallet Address
+                      </span>
+                      <span className="text-foreground">
                         {formatAddress(profile.address)}
                       </span>
                     </div>
                     <div className="flex justify-between py-2 border-b border-border/40">
-                      <span className="text-slate-500">Registered At</span>
-                      <span className="text-slate-300">
+                      <span className="text-muted-foreground">
+                        Registered At
+                      </span>
+                      <span className="text-foreground">
                         {new Date(
                           profile.registeredAt * 1000,
                         ).toLocaleDateString()}
@@ -321,28 +325,32 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <div className="bg-[#0d131a] border border-border rounded-lg p-6 space-y-4">
-                  <h3 className="text-xs font-bold font-mono uppercase text-slate-400 tracking-wider flex items-center gap-2">
+                <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+                  <h3 className="text-xs font-bold font-mono uppercase text-muted-foreground tracking-wider flex items-center gap-2">
                     <FileBadge2 className="w-4 h-4 text-primary" />
                     Verification Credentials
                   </h3>
                   <div className="space-y-3 text-xs font-mono">
                     <div className="flex justify-between py-2 border-b border-border/40">
-                      <span className="text-slate-500">On-Chain Status</span>
+                      <span className="text-muted-foreground">
+                        On-Chain Status
+                      </span>
                       <span
                         className={
                           isVerified
-                            ? "text-emerald-400 font-bold"
-                            : "text-amber-400 font-bold"
+                            ? "text-success font-bold"
+                            : "text-warning font-bold"
                         }
                       >
                         {isVerified ? "Verified" : "Unverified"}
                       </span>
                     </div>
                     <div className="flex justify-between py-2 border-b border-border/40">
-                      <span className="text-slate-500">Registry Contract</span>
+                      <span className="text-muted-foreground">
+                        Registry Contract
+                      </span>
                       <span
-                        className="text-slate-300 truncate max-w-[180px]"
+                        className="text-foreground truncate max-w-[180px]"
                         title={registryContractID}
                       >
                         {registryContractID
@@ -351,8 +359,8 @@ export default function ProfilePage() {
                       </span>
                     </div>
                     <div className="flex justify-between py-2 border-b border-border/40">
-                      <span className="text-slate-500">Network</span>
-                      <span className="text-slate-300 uppercase">
+                      <span className="text-muted-foreground">Network</span>
+                      <span className="text-foreground uppercase">
                         Stellar Testnet
                       </span>
                     </div>
@@ -362,15 +370,15 @@ export default function ProfilePage() {
             </div>
           ) : (
             /* Registration Prompt */
-            <div className="bg-[#0d131a] border border-border rounded-lg p-8 md:p-12 text-center max-w-2xl mx-auto space-y-6">
+            <div className="bg-card border border-border rounded-lg p-8 md:p-12 text-center max-w-2xl mx-auto space-y-6">
               <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-center mx-auto text-primary">
                 <Fingerprint className="w-7 h-7" />
               </div>
               <div className="space-y-2">
-                <h2 className="text-xl font-bold font-mono text-white">
+                <h2 className="text-xl font-bold font-mono text-foreground">
                   No Business Profile Found
                 </h2>
-                <p className="text-xs font-mono text-slate-400 leading-relaxed">
+                <p className="text-xs font-mono text-muted-foreground leading-relaxed">
                   Your connected wallet is not yet registered on the TrusTrove
                   Registry contract. Register as an SME Issuer to tokenize
                   invoices or as a Buyer to verify and settle them.
@@ -404,11 +412,11 @@ export default function ProfilePage() {
             tabIndex={-1}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
           >
-            <div className="bg-[#0d131a] border border-border rounded-lg p-6 md:p-8 max-w-lg w-full space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <div className="bg-card border border-border rounded-lg p-6 md:p-8 max-w-lg w-full space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between border-b border-border/40 pb-4">
                 <h2
                   id="registration-dialog-title"
-                  className="text-base font-bold font-mono text-white uppercase tracking-wider"
+                  className="text-base font-bold font-mono text-foreground uppercase tracking-wider"
                 >
                   {profile
                     ? "Update Profile Metadata"
@@ -418,14 +426,14 @@ export default function ProfilePage() {
                   type="button"
                   onClick={() => setShowRegModal(false)}
                   aria-label="Close registration dialog"
-                  className="text-slate-400 hover:text-white font-mono text-sm"
+                  className="text-muted-foreground hover:text-foreground font-mono text-sm"
                 >
                   ✕
                 </button>
               </div>
 
               {localError && (
-                <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-mono p-3 rounded-lg flex items-start gap-2">
+                <div className="bg-destructive/10 border border-destructive/30 text-destructive text-xs font-mono p-3 rounded-lg flex items-start gap-2">
                   <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{localError}</span>
                 </div>
@@ -434,7 +442,7 @@ export default function ProfilePage() {
               <form onSubmit={handleRegisterSubmit} className="space-y-4">
                 {!profile && (
                   <div className="space-y-2">
-                    <label className="text-xs font-mono text-slate-400 uppercase">
+                    <label className="text-xs font-mono text-muted-foreground uppercase">
                       Role
                     </label>
                     <div className="grid grid-cols-2 gap-3">
@@ -444,7 +452,7 @@ export default function ProfilePage() {
                         className={`py-2.5 px-4 rounded-lg font-mono text-xs font-bold border transition-all ${
                           regRole === "issuer"
                             ? "bg-primary/10 border-primary text-primary"
-                            : "bg-slate-900 border-border text-slate-400 hover:border-slate-700"
+                            : "bg-background border-border text-muted-foreground hover:border-primary/40"
                         }`}
                       >
                         SME / Issuer
@@ -455,7 +463,7 @@ export default function ProfilePage() {
                         className={`py-2.5 px-4 rounded-lg font-mono text-xs font-bold border transition-all ${
                           regRole === "buyer"
                             ? "bg-primary/10 border-primary text-primary"
-                            : "bg-slate-900 border-border text-slate-400 hover:border-slate-700"
+                            : "bg-background border-border text-muted-foreground hover:border-primary/40"
                         }`}
                       >
                         Buyer
@@ -465,7 +473,7 @@ export default function ProfilePage() {
                 )}
 
                 <div className="space-y-2">
-                  <label className="text-xs font-mono text-slate-400 uppercase">
+                  <label className="text-xs font-mono text-muted-foreground uppercase">
                     Company Name *
                   </label>
                   <input
@@ -473,12 +481,12 @@ export default function ProfilePage() {
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                     placeholder="e.g. Acme Corporation"
-                    className="w-full bg-slate-900 border border-border rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-primary"
+                    className="w-full bg-background border border-input rounded-lg px-3 py-2 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-mono text-slate-400 uppercase">
+                  <label className="text-xs font-mono text-muted-foreground uppercase">
                     Tax ID / Registration Number *
                   </label>
                   <input
@@ -486,12 +494,12 @@ export default function ProfilePage() {
                     value={taxId}
                     onChange={(e) => setTaxId(e.target.value)}
                     placeholder="e.g. REG-123456789"
-                    className="w-full bg-slate-900 border border-border rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-primary"
+                    className="w-full bg-background border border-input rounded-lg px-3 py-2 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-mono text-slate-400 uppercase">
+                  <label className="text-xs font-mono text-muted-foreground uppercase">
                     Country of Incorporation *
                   </label>
                   <input
@@ -499,13 +507,13 @@ export default function ProfilePage() {
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
                     placeholder="e.g. United States"
-                    className="w-full bg-slate-900 border border-border rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-primary"
+                    className="w-full bg-background border border-input rounded-lg px-3 py-2 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-mono text-slate-400 uppercase">
+                    <label className="text-xs font-mono text-muted-foreground uppercase">
                       Website (Optional)
                     </label>
                     <input
@@ -513,12 +521,12 @@ export default function ProfilePage() {
                       value={website}
                       onChange={(e) => setWebsite(e.target.value)}
                       placeholder="https://acme.com"
-                      className="w-full bg-slate-900 border border-border rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-primary"
+                      className="w-full bg-background border border-input rounded-lg px-3 py-2 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-mono text-slate-400 uppercase">
+                    <label className="text-xs font-mono text-muted-foreground uppercase">
                       Email (Optional)
                     </label>
                     <input
@@ -526,7 +534,7 @@ export default function ProfilePage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="contact@acme.com"
-                      className="w-full bg-slate-900 border border-border rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-primary"
+                      className="w-full bg-background border border-input rounded-lg px-3 py-2 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
                     />
                   </div>
                 </div>

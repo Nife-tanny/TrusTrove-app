@@ -321,17 +321,17 @@ export default function Marketplace() {
         <div className="border-b border-border/40 pb-5">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-xl font-bold font-mono tracking-wider uppercase text-white">
+              <h1 className="text-xl font-bold font-mono tracking-wider uppercase text-foreground">
                 {t("header.title")}
               </h1>
-              <p className="text-slate-500 text-xs font-mono mt-1">
+              <p className="text-muted-foreground text-xs font-mono mt-1">
                 {t("header.description")}
               </p>
             </div>
 
             {/* Top Available Liquidity indicator */}
-            <div className="bg-[#0d131a] border border-border rounded-lg px-4 py-2 text-right font-mono">
-              <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider block">
+            <div className="bg-card border border-border rounded-lg px-4 py-2 text-right font-mono">
+              <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider block">
                 {t("header.liquidityLabel")}
               </span>
               <span className="text-sm font-bold text-primary block mt-0.5">
@@ -345,13 +345,13 @@ export default function Marketplace() {
 
         {/* Warning Banner for Unverified Profiles */}
         {connected && !isVerified && (
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 flex items-start gap-3 font-mono text-xs text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.02)]">
+          <div className="bg-warning/10 border border-warning/30 rounded-lg p-4 flex items-start gap-3 font-mono text-xs text-warning shadow-[0_0_20px_rgba(245,158,11,0.02)]">
             <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5" />
             <div className="space-y-1">
               <span className="font-bold uppercase">
                 {t("verificationBanner.title")}
               </span>
-              <p className="text-slate-400 leading-relaxed text-[11px]">
+              <p className="text-muted-foreground leading-relaxed text-[11px]">
                 {t.rich("verificationBanner.body", {
                   link: (chunks) => (
                     <Link
@@ -368,11 +368,11 @@ export default function Marketplace() {
         )}
 
         {/* Filter bar */}
-        <div className="bg-[#0d131a] border border-border rounded-lg p-4 grid grid-cols-1 md:grid-cols-5 gap-4 font-mono text-xs items-end">
+        <div className="bg-card border border-border rounded-lg p-4 grid grid-cols-1 md:grid-cols-5 gap-4 font-mono text-xs items-end">
           <div className="space-y-1">
             <label
               htmlFor="marketplace-status"
-              className="text-[10px] text-slate-500 font-bold uppercase"
+              className="text-[10px] text-muted-foreground font-bold uppercase"
             >
               {t("filters.status.label")}
             </label>
@@ -383,7 +383,7 @@ export default function Marketplace() {
                 setStatusFilter(e.target.value);
                 setSelectedInvoice(null);
               }}
-              className="w-full bg-[#080c10] border border-border rounded px-3 py-1.5 text-white focus:outline-none focus:border-primary cursor-pointer"
+              className="w-full bg-background border border-input rounded px-3 py-1.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary cursor-pointer"
             >
               <option value="ALL">{t("filters.status.options.all")}</option>
               <option value="Created">
@@ -413,7 +413,7 @@ export default function Marketplace() {
           <div className="space-y-1">
             <label
               htmlFor="marketplace-min-value"
-              className="text-[10px] text-slate-500 font-bold uppercase"
+              className="text-[10px] text-muted-foreground font-bold uppercase"
             >
               {t("filters.minValue.label")}
             </label>
@@ -421,7 +421,7 @@ export default function Marketplace() {
               id="marketplace-min-value"
               type="number"
               placeholder={t("filters.minValue.placeholder")}
-              className="w-full bg-[#080c10] border border-border rounded px-3 py-1.5 text-white focus:outline-none focus:border-primary"
+              className="w-full bg-background border border-input rounded px-3 py-1.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
               value={minAmount}
               onChange={(e) => setMinAmount(e.target.value)}
             />
@@ -430,7 +430,7 @@ export default function Marketplace() {
           <div className="space-y-1">
             <label
               htmlFor="marketplace-max-value"
-              className="text-[10px] text-slate-500 font-bold uppercase"
+              className="text-[10px] text-muted-foreground font-bold uppercase"
             >
               {t("filters.maxValue.label")}
             </label>
@@ -438,7 +438,7 @@ export default function Marketplace() {
               id="marketplace-max-value"
               type="number"
               placeholder={t("filters.maxValue.placeholder")}
-              className="w-full bg-[#080c10] border border-border rounded px-3 py-1.5 text-white focus:outline-none focus:border-primary"
+              className="w-full bg-background border border-input rounded px-3 py-1.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
               value={maxAmount}
               onChange={(e) => setMaxAmount(e.target.value)}
             />
@@ -446,7 +446,7 @@ export default function Marketplace() {
 
           <div className="space-y-1">
             <div className="flex justify-between text-[10px]">
-              <span className="text-slate-500 font-bold uppercase">
+              <span className="text-muted-foreground font-bold uppercase">
                 {t("filters.maxDiscount.label")}
               </span>
               <span className="text-primary font-bold">
@@ -458,7 +458,7 @@ export default function Marketplace() {
               min="50"
               max="500"
               step="50"
-              className="w-full accent-primary bg-slate-900 h-1.5 rounded"
+              className="w-full accent-primary bg-muted-foreground/40 h-1.5 rounded"
               value={maxDiscount}
               onChange={(e) => setMaxDiscount(e.target.value)}
               aria-label={t("filters.maxDiscount.ariaLabel")}
@@ -470,14 +470,14 @@ export default function Marketplace() {
 
           {/* Saved Searches / Presets */}
           <div className="relative space-y-1">
-            <span className="text-[10px] text-slate-500 font-bold uppercase">
+            <span className="text-[10px] text-muted-foreground font-bold uppercase">
               Saved Searches
             </span>
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setShowPresetsDropdown(!showPresetsDropdown)}
-                className="w-full bg-[#080c10] border border-border rounded px-3 py-1.5 text-white focus:outline-none focus:border-primary cursor-pointer flex items-center justify-between text-left hover:border-primary/40 transition-colors"
+                className="w-full bg-background border border-input rounded px-3 py-1.5 text-foreground focus:outline-none focus:border-primary cursor-pointer flex items-center justify-between text-left hover:border-primary/40 transition-colors"
                 aria-haspopup="listbox"
                 aria-expanded={showPresetsDropdown}
               >
@@ -486,12 +486,12 @@ export default function Marketplace() {
                     ? `${presets.length} preset${presets.length !== 1 ? "s" : ""} saved`
                     : "No saved searches"}
                 </span>
-                <Menu className="w-4 h-4 text-slate-400 shrink-0" />
+                <Menu className="w-4 h-4 text-muted-foreground shrink-0" />
               </button>
 
               {showPresetsDropdown && (
                 <div
-                  className="absolute bottom-full left-0 right-0 mb-2 bg-[#0d131a] border border-border rounded-lg p-2 shadow-xl z-10 font-mono text-xs max-h-80 overflow-auto"
+                  className="absolute bottom-full left-0 right-0 mb-2 bg-card border border-border rounded-lg p-2 shadow-xl z-10 font-mono text-xs max-h-80 overflow-auto"
                   role="listbox"
                 >
                   {/* Save current filters as new preset */}
@@ -499,7 +499,7 @@ export default function Marketplace() {
                     <input
                       type="text"
                       placeholder="Preset name..."
-                      className="flex-1 bg-[#080c10] border border-border rounded px-2 py-1.5 text-white focus:outline-none focus:border-primary text-[11px]"
+                      className="flex-1 bg-background border border-input rounded px-2 py-1.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary text-[11px]"
                       value={newPresetName}
                       onChange={(e) => setNewPresetName(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && savePreset()}
@@ -509,7 +509,7 @@ export default function Marketplace() {
                       type="button"
                       onClick={savePreset}
                       disabled={!newPresetName.trim() || presets.length >= 10}
-                      className="px-3 py-1.5 bg-primary text-black font-bold uppercase text-[10px] rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                      className="px-3 py-1.5 bg-primary text-primary-foreground font-bold uppercase text-[10px] rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                     >
                       <Save className="w-3.5 h-3.5" />
                     </button>
@@ -517,7 +517,7 @@ export default function Marketplace() {
 
                   {/* Presets list */}
                   {presets.length === 0 ? (
-                    <p className="text-slate-500 text-center py-2 text-[10px]">
+                    <p className="text-muted-foreground text-center py-2 text-[10px]">
                       No saved searches yet
                     </p>
                   ) : (
@@ -528,7 +528,7 @@ export default function Marketplace() {
                             <div className="flex gap-2 p-2">
                               <input
                                 type="text"
-                                className="flex-1 bg-[#080c10] border border-primary rounded px-2 py-1 text-white focus:outline-none text-[11px]"
+                                className="flex-1 bg-background border border-primary rounded px-2 py-1 text-foreground placeholder:text-muted-foreground focus:outline-none text-[11px]"
                                 value={editingPresetName}
                                 onChange={(e) =>
                                   setEditingPresetName(e.target.value)
@@ -554,16 +554,16 @@ export default function Marketplace() {
                               </button>
                             </div>
                           ) : (
-                            <div className="flex items-center justify-between p-2 hover:bg-slate-900/50 rounded">
+                            <div className="flex items-center justify-between p-2 hover:bg-background rounded">
                               <button
                                 type="button"
                                 onClick={() => applyPreset(preset)}
-                                className="flex-1 text-left text-white hover:text-primary transition-colors flex items-center gap-2"
+                                className="flex-1 text-left text-foreground hover:text-primary transition-colors flex items-center gap-2"
                                 role="option"
                                 aria-selected="false"
                               >
                                 <span className="font-bold">{preset.name}</span>
-                                <span className="text-slate-500 text-[9px]">
+                                <span className="text-muted-foreground text-[9px]">
                                   ({preset.filters.statusFilter}
                                   {", "}
                                   {preset.filters.minAmount || "0"}
@@ -582,7 +582,7 @@ export default function Marketplace() {
                                       preset.name,
                                     );
                                   }}
-                                  className="p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors"
+                                  className="p-1 text-muted-foreground hover:text-foreground hover:bg-background rounded transition-colors"
                                   aria-label="Rename preset"
                                 >
                                   <Menu className="w-3.5 h-3.5" />
@@ -593,7 +593,7 @@ export default function Marketplace() {
                                     e.stopPropagation();
                                     deletePreset(index.toString());
                                   }}
-                                  className="p-1 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded transition-colors"
+                                  className="p-1 text-muted-foreground hover:text-destructive hover:bg-background rounded transition-colors"
                                   aria-label="Delete preset"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -608,7 +608,7 @@ export default function Marketplace() {
 
                   {/* Cap notice */}
                   {presets.length >= 10 && (
-                    <p className="text-amber-400 text-[9px] text-center pt-2 border-t border-border/40">
+                    <p className="text-warning text-[9px] text-center pt-2 border-t border-border/40">
                       Maximum of 10 presets reached
                     </p>
                   )}
@@ -624,7 +624,7 @@ export default function Marketplace() {
           <div className="lg:col-span-8 space-y-4">
             <div className="flex justify-between items-center">
               <h2
-                className="text-sm font-bold font-mono tracking-wider uppercase text-white"
+                className="text-sm font-bold font-mono tracking-wider uppercase text-foreground"
                 aria-live="polite"
                 aria-atomic="true"
               >
@@ -684,12 +684,12 @@ export default function Marketplace() {
 
             {/* Compare Selected Toolbar */}
             {selectedInvoiceIds.length >= 2 && (
-              <div className="bg-[#0d131a] border border-primary/20 rounded-lg p-4 flex items-center justify-between gap-4 font-mono text-xs">
+              <div className="bg-card border border-primary/20 rounded-lg p-4 flex items-center justify-between gap-4 font-mono text-xs">
                 <div className="flex items-center gap-3">
                   <span className="text-primary font-bold uppercase">
                     {selectedInvoiceIds.length} selected
                   </span>
-                  <span className="text-slate-500 text-[10px]">
+                  <span className="text-muted-foreground text-[10px]">
                     (max 4 for comparison)
                   </span>
                 </div>
@@ -697,7 +697,7 @@ export default function Marketplace() {
                   type="button"
                   onClick={() => setShowCompareModal(true)}
                   disabled={selectedInvoiceIds.length > 4}
-                  className="px-4 py-2 bg-primary text-black font-bold uppercase tracking-wider rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+                  className="px-4 py-2 bg-primary text-primary-foreground font-bold uppercase tracking-wider rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
                 >
                   <RotateCcw className="w-4 h-4" />
                   Compare Selected
@@ -719,7 +719,7 @@ export default function Marketplace() {
             <h2
               ref={consoleHeadingRef}
               tabIndex={-1}
-              className="text-sm font-bold font-mono tracking-wider uppercase text-white"
+              className="text-sm font-bold font-mono tracking-wider uppercase text-foreground"
             >
               {t("console.title")}
             </h2>
@@ -733,7 +733,7 @@ export default function Marketplace() {
               {selectedInvoice ? (
                 <div className="space-y-4">
                   <div className="flex justify-between items-center text-[10px] font-mono">
-                    <span className="text-slate-500 uppercase">
+                    <span className="text-muted-foreground uppercase">
                       {t.rich("console.role", {
                         role: connected ? role : t("console.publicView"),
                         strong: (chunks) => (
@@ -755,7 +755,7 @@ export default function Marketplace() {
                   {selectedInvoice.status === "Listed" &&
                     role === "lp" &&
                     connected && (
-                      <div className="bg-[#0d131a] border border-primary/20 rounded p-4 text-xs font-mono space-y-2">
+                      <div className="bg-card border border-primary/20 rounded p-4 text-xs font-mono space-y-2">
                         <span className="text-primary font-bold block uppercase text-[10px] tracking-wider">
                           {t("console.fundingPreview.title")}
                         </span>
@@ -784,7 +784,7 @@ export default function Marketplace() {
                             )}
                           </span>
                         </div>
-                        <div className="text-[10px] text-slate-500 pt-1 leading-normal border-t border-border/20 mt-1">
+                        <div className="text-[10px] text-muted-foreground pt-1 leading-normal border-t border-border/20 mt-1">
                           {t("console.fundingPreview.note")}
                         </div>
                       </div>
@@ -797,11 +797,11 @@ export default function Marketplace() {
                   />
                 </div>
               ) : (
-                <div className="bg-card border border-dashed border-border rounded-lg p-6 text-center text-slate-500 font-mono text-[10px] py-20 uppercase tracking-wider">
-                  <p className="mb-2 font-bold text-slate-400">
+                <div className="bg-card border border-dashed border-border rounded-lg p-6 text-center text-muted-foreground font-mono text-[10px] py-20 uppercase tracking-wider">
+                  <p className="mb-2 font-bold text-foreground">
                     {t("console.emptyState.title")}
                   </p>
-                  <p className="normal-case text-slate-500 leading-relaxed max-w-[200px] mx-auto">
+                  <p className="normal-case text-muted-foreground leading-relaxed max-w-[200px] mx-auto">
                     {t("console.emptyState.description")}
                   </p>
                 </div>

@@ -91,7 +91,9 @@ export default function LPDashboard() {
     return (
       <PageLayout>
         <div className="flex min-h-[70vh] flex-col items-center justify-center gap-6">
-          <h1 className="text-2xl font-bold text-white">Connect Your Wallet</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            Connect Your Wallet
+          </h1>
           <WalletConnect />
         </div>
       </PageLayout>
@@ -148,14 +150,19 @@ export default function LPDashboard() {
     Math.max(0, (stats?.utilizationRateBps ?? 0) / 100),
   );
 
+  // Both arcs come from the theme. `--muted` equals `--card` in the dark theme,
+  // so the empty arc uses muted-foreground at low opacity instead of vanishing;
+  // the ring border below is the border token.
+  const donutBackground = `conic-gradient(hsl(var(--primary)) ${utilization}%, hsl(var(--muted-foreground) / 0.35) ${utilization}% 100%)`;
+
   return (
     <PageLayout>
       <div className="mx-auto max-w-5xl space-y-6 py-4">
         <div>
-          <h1 className="text-xl font-bold uppercase text-white">
+          <h1 className="text-xl font-bold uppercase text-foreground">
             Liquidity Provider Portal
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-muted-foreground">
             Supply USDC liquidity, track pool performance, and manage your
             position.
           </p>
@@ -164,7 +171,7 @@ export default function LPDashboard() {
         <section aria-labelledby="pool-overview-heading" className="space-y-3">
           <h2
             id="pool-overview-heading"
-            className="text-sm font-bold uppercase tracking-wider text-white"
+            className="text-sm font-bold uppercase tracking-wider text-foreground"
           >
             Pool Overview
           </h2>
@@ -173,16 +180,14 @@ export default function LPDashboard() {
           ) : (
             <div className="bg-card border border-border rounded-lg p-6 flex flex-col md:flex-row items-center gap-8">
               <div
-                className="relative flex h-36 w-36 shrink-0 items-center justify-center rounded-full border-[8px] border-slate-900"
-                style={{
-                  background: `conic-gradient(#00d4aa ${utilization}%, #17212b ${utilization}% 100%)`,
-                }}
+                className="relative flex h-36 w-36 shrink-0 items-center justify-center rounded-full border-[8px] border-border"
+                style={{ background: donutBackground }}
               >
                 <div className="flex h-28 w-28 flex-col items-center justify-center rounded-full bg-card">
-                  <span className="text-2xl font-bold text-white">
+                  <span className="text-2xl font-bold text-foreground">
                     {utilization.toFixed(1)}%
                   </span>
-                  <span className="text-[10px] uppercase text-slate-500">
+                  <span className="text-[10px] uppercase text-muted-foreground">
                     Utilization
                   </span>
                 </div>
@@ -212,19 +217,19 @@ export default function LPDashboard() {
         <section aria-labelledby="position-heading" className="space-y-3">
           <h2
             id="position-heading"
-            className="text-sm font-bold uppercase tracking-wider text-white"
+            className="text-sm font-bold uppercase tracking-wider text-foreground"
           >
             My Position
           </h2>
           {isPositionLoading ? (
             <LPPositionCardSkeleton />
           ) : (
-            <div className="bg-[#0d131a] border border-border rounded-lg p-5 space-y-4">
+            <div className="bg-card border border-border rounded-lg p-5 space-y-4">
               <div className="flex items-center justify-between border-b border-border/40 pb-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-white">
+                <span className="text-xs font-bold uppercase tracking-wider text-foreground">
                   Active LP Position
                 </span>
-                <span className="text-[10px] text-slate-500">
+                <span className="text-[10px] text-muted-foreground">
                   {position?.depositCount ?? 0} deposits
                 </span>
               </div>
@@ -251,12 +256,12 @@ export default function LPDashboard() {
             onSubmit={handleDeposit}
             className="space-y-4 rounded-lg border border-border bg-card p-6"
           >
-            <h2 className="text-sm font-bold uppercase tracking-wider text-white">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
               Deposit USDC
             </h2>
             <label
               htmlFor="deposit-amount"
-              className="block text-sm text-slate-300"
+              className="block text-sm text-foreground"
             >
               Deposit amount
             </label>
@@ -272,7 +277,7 @@ export default function LPDashboard() {
                 setDepositAmount(event.target.value);
                 setDepositError(null);
               }}
-              className="w-full rounded border border-border bg-slate-950 px-3 py-2 text-white"
+              className="w-full rounded border border-input bg-background px-3 py-2 text-foreground"
             />
             {depositError && (
               <p id="deposit-amount-error" role="alert" className="text-sm text-rose-300">
@@ -287,7 +292,7 @@ export default function LPDashboard() {
             <button
               type="submit"
               disabled={isDepositing}
-              className="rounded bg-primary px-4 py-2 font-semibold text-black disabled:opacity-50"
+              className="rounded bg-primary px-4 py-2 font-semibold text-primary-foreground disabled:opacity-50"
             >
               {isDepositing ? "Depositing..." : "Deposit USDC"}
             </button>
@@ -297,12 +302,12 @@ export default function LPDashboard() {
             onSubmit={handleWithdraw}
             className="space-y-4 rounded-lg border border-border bg-card p-6"
           >
-            <h2 className="text-sm font-bold uppercase tracking-wider text-white">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
               Withdraw Liquidity
             </h2>
             <label
               htmlFor="withdraw-shares"
-              className="block text-sm text-slate-300"
+              className="block text-sm text-foreground"
             >
               Shares to redeem
             </label>
@@ -318,20 +323,20 @@ export default function LPDashboard() {
                 setWithdrawShares(event.target.value);
                 setWithdrawError(null);
               }}
-              className="w-full rounded border border-border bg-slate-950 px-3 py-2 text-white"
+              className="w-full rounded border border-input bg-background px-3 py-2 text-foreground"
             />
             {withdrawError && (
               <p id="withdraw-shares-error" role="alert" className="text-sm text-rose-300">
                 {withdrawError}
               </p>
             )}
-            <p id="withdraw-available" className="text-xs text-slate-500">
+            <p id="withdraw-available" className="text-xs text-muted-foreground">
               Available: {formatShareValue(position?.shares)}
             </p>
             <button
               type="submit"
               disabled={isWithdrawing || !position?.shares}
-              className="rounded border border-rose-500/60 px-4 py-2 font-semibold text-rose-300 disabled:opacity-50"
+              className="rounded border border-destructive/60 px-4 py-2 font-semibold text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
             >
               {isWithdrawing ? "Withdrawing..." : "Withdraw Shares"}
             </button>
@@ -345,10 +350,12 @@ export default function LPDashboard() {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="space-y-1">
-      <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+      <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
         {label}
       </span>
-      <span className="block text-sm font-semibold text-white">{value}</span>
+      <span className="block text-sm font-semibold text-foreground">
+        {value}
+      </span>
     </div>
   );
 }

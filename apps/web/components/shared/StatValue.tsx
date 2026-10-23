@@ -25,13 +25,13 @@ export function StatValue({ value, isLoading, error }: StatValueProps) {
         : "An unexpected error occurred.";
   if (errorMessage !== null || value === null) {
     return (
-      <span className="text-xl sm:text-2xl font-bold font-mono text-slate-600 block">
+      <span className="text-xl sm:text-2xl font-bold font-mono text-muted-foreground block">
         —
       </span>
     );
   }
   return (
-    <span className="text-xl sm:text-2xl font-bold font-mono text-white block">
+    <span className="text-xl sm:text-2xl font-bold font-mono text-foreground block">
       {value}
     </span>
   );
