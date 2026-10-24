@@ -587,7 +587,9 @@ test.describe("Invoice detail - cancellation and failures", () => {
     await expect(pendingModal(page)).toHaveCount(0);
     await expect(statusBadge(page, "Active")).toBeVisible();
     await expect(actionButton(page, CONFIRM_DELIVERY)).toBeEnabled();
-    expect(ledger.simulations).toEqual([]);
+    // Only the cancelled action matters: with a registry contract configured
+    // (as in CI), the page also simulates read-only profile lookups.
+    expect(ledger.simulations).not.toContain("confirm_delivery");
     expect(ledger.submissions).toEqual([]);
   });
 
