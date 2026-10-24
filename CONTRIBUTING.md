@@ -176,7 +176,7 @@ Locally, Playwright starts `next dev` on port 3000, or reuses a dev server that 
 CI=true pnpm test:e2e
 ```
 
-`NEXT_PUBLIC_*` values are inlined at build time, so the build the specs run against must see them. CI sets the testnet `NEXT_PUBLIC_REGISTRY_CONTRACT_ID`, `NEXT_PUBLIC_INVOICE_CONTRACT_ID`, `NEXT_PUBLIC_POOL_CONTRACT_ID` and `NEXT_PUBLIC_ESCROW_CONTRACT_ID` at the workflow level (the same values as in `.env.example`). Locally they come from your `.env.local` (repo root or `apps/web`) or the shell. The other `NEXT_PUBLIC_*` variables fall back to testnet defaults.
+`NEXT_PUBLIC_*` values are inlined at build time, so the build the specs run against must see them. CI sets the testnet `NEXT_PUBLIC_REGISTRY_CONTRACT_ID`, `NEXT_PUBLIC_INVOICE_CONTRACT_ID`, `NEXT_PUBLIC_POOL_CONTRACT_ID` and `NEXT_PUBLIC_ESCROW_CONTRACT_ID` on the build and E2E steps only (the same values as in `.env.example`; the SDK's unit tests expect them unset). Locally they come from your `.env.local` (repo root or `apps/web`) or the shell. The other `NEXT_PUBLIC_*` variables fall back to testnet defaults.
 
 In CI the run uses one worker and retries a failing test twice, and the `github` reporter annotates failures on the pull request. If the job fails, download the `playwright-report` artifact from the workflow run, unzip it, and open it with `pnpm --filter web exec playwright show-report <unzipped-folder>`. Retried tests include a trace.
 
