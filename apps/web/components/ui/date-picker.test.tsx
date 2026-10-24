@@ -9,9 +9,9 @@ const calendarState = vi.hoisted(() => ({
 
 // Fixed dates the mock calendar renders so consumers can assert disabled state.
 const MOCK_DATES = [
-  new Date(2026, 0, 5),
-  new Date(2026, 0, 10),
-  new Date(2026, 0, 15),
+  new Date(Date.UTC(2026, 0, 5)),
+  new Date(Date.UTC(2026, 0, 10)),
+  new Date(Date.UTC(2026, 0, 15)),
 ];
 
 vi.mock("@/components/ui/calendar", () => ({

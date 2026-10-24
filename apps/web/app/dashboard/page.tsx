@@ -63,10 +63,7 @@ export default function SMEDashboard() {
   );
 
   useEffect(() => {
-    if (
-      !selectedInvoice ||
-      window.matchMedia("(min-width: 1024px)").matches
-    ) {
+    if (!selectedInvoice || window.matchMedia("(min-width: 1024px)").matches) {
       return;
     }
 
@@ -475,7 +472,12 @@ export default function SMEDashboard() {
             >
               {t("console.title")}
             </h2>
-            <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+            <p
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              className="sr-only"
+            >
               {selectedInvoice
                 ? tCommon("invoiceSelected", { id: selectedInvoice.id })
                 : ""}

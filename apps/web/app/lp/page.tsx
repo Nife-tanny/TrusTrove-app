@@ -272,7 +272,9 @@ export default function LPDashboard() {
               step="any"
               value={depositAmount}
               aria-invalid={depositError ? "true" : undefined}
-              aria-describedby={depositError ? "deposit-amount-error" : undefined}
+              aria-describedby={
+                depositError ? "deposit-amount-error" : undefined
+              }
               onChange={(event) => {
                 setDepositAmount(event.target.value);
                 setDepositError(null);
@@ -280,7 +282,11 @@ export default function LPDashboard() {
               className="w-full rounded border border-input bg-background px-3 py-2 text-foreground"
             />
             {depositError && (
-              <p id="deposit-amount-error" role="alert" className="text-sm text-rose-300">
+              <p
+                id="deposit-amount-error"
+                role="alert"
+                className="text-sm text-rose-300"
+              >
                 {depositError}
               </p>
             )}
@@ -326,11 +332,18 @@ export default function LPDashboard() {
               className="w-full rounded border border-input bg-background px-3 py-2 text-foreground"
             />
             {withdrawError && (
-              <p id="withdraw-shares-error" role="alert" className="text-sm text-rose-300">
+              <p
+                id="withdraw-shares-error"
+                role="alert"
+                className="text-sm text-rose-300"
+              >
                 {withdrawError}
               </p>
             )}
-            <p id="withdraw-available" className="text-xs text-muted-foreground">
+            <p
+              id="withdraw-available"
+              className="text-xs text-muted-foreground"
+            >
               Available: {formatShareValue(position?.shares)}
             </p>
             <button

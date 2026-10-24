@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { PageLayout } from "@/components/shared/PageLayout";
@@ -157,10 +163,7 @@ export default function Marketplace() {
   );
 
   useEffect(() => {
-    if (
-      !selectedInvoice ||
-      window.matchMedia("(min-width: 1024px)").matches
-    ) {
+    if (!selectedInvoice || window.matchMedia("(min-width: 1024px)").matches) {
       return;
     }
 
@@ -723,7 +726,12 @@ export default function Marketplace() {
             >
               {t("console.title")}
             </h2>
-            <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+            <p
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              className="sr-only"
+            >
               {selectedInvoice
                 ? tCommon("invoiceSelected", { id: selectedInvoice.id })
                 : ""}

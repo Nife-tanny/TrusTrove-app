@@ -55,7 +55,11 @@ async function mockInvoiceApis(page: Page) {
       status: 200,
       contentType: "application/json",
       headers: { "access-control-allow-origin": "*" },
-      body: JSON.stringify({ address: MOCK_WALLET, verified: true, role: "issuer" }),
+      body: JSON.stringify({
+        address: MOCK_WALLET,
+        verified: true,
+        role: "issuer",
+      }),
     });
   });
   await page.route("**/pool**", async (route) => {
@@ -206,7 +210,9 @@ test("reduced motion disables feed transforms and skeleton shimmer", async ({
   await eventsRequest;
   await expect(shimmer).toBeVisible({ timeout: 15000 });
   await expect
-    .poll(() => shimmer.evaluate((element) => getComputedStyle(element).animationName))
+    .poll(() =>
+      shimmer.evaluate((element) => getComputedStyle(element).animationName),
+    )
     .toBe("none");
 
   releaseEvents();
@@ -214,6 +220,8 @@ test("reduced motion disables feed transforms and skeleton shimmer", async ({
   const feedEntry = feed.getByRole("listitem");
   await expect(feedEntry).toBeVisible({ timeout: 15000 });
   await expect
-    .poll(() => feedEntry.evaluate((element) => getComputedStyle(element).transform))
+    .poll(() =>
+      feedEntry.evaluate((element) => getComputedStyle(element).transform),
+    )
     .toBe("none");
 });
