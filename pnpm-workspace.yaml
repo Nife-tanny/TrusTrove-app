@@ -9,8 +9,6 @@ auditConfig:
   ignoreGhsas:
     - GHSA-p293-qw3h-jr36
     - GHSA-2xp9-vwfh-vxw4
-    - GHSA-2464-fhr4-w9xw
-    - GHSA-p3m5-59mp-jv5r
     - GHSA-h25m-26qc-wcjf
     - GHSA-q4gf-8mx6-v5v3
     - GHSA-8h8q-6873-q5fj
@@ -38,9 +36,7 @@ overrides:
   glob: ">=12.0.0 <13"
   brace-expansion@1: ">=1.1.18 <2"
   brace-expansion@5: ">=5.0.9 <6"
-  undici: ">=7.30.1 <8"
-  toml: ">=5.0.1 <6"
-  dompurify: ">=3.4.17 <4"
+  undici: ">=7.29.0 <8"
   axios: ">=1.20.0 <2"
   follow-redirects: ">=1.16.1 <2"
   vite: ">=8.1.6 <9"
