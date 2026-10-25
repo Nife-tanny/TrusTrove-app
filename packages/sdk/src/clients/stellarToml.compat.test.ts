@@ -46,9 +46,7 @@ describe("Stellar TOML resolver compatibility", () => {
     );
 
     expect(result.VERSION).toBe("2.1.0");
-    expect(result.NETWORK_PASSPHRASE).toBe(
-      "Test SDF Network ; September 2015",
-    );
+    expect(result.NETWORK_PASSPHRASE).toBe("Test SDF Network ; September 2015");
     expect(result.ACCOUNTS).toEqual([
       "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF",
     ]);
