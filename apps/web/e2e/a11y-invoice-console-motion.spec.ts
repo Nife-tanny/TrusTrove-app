@@ -167,9 +167,9 @@ for (const route of ["/dashboard", "/marketplace"]) {
         hasText: "Invoice INV#inv-mobile-001 selected, actions available below",
       }),
     ).toBeAttached();
-    const headingBox = await consoleHeading.boundingBox();
-    expect(headingBox?.y).toBeGreaterThanOrEqual(0);
-    expect(headingBox?.y).toBeLessThan(812);
+    // The page smooth-scrolls to the console, so retry until it settles
+    // instead of reading the heading's position once mid-scroll.
+    await expect(consoleHeading).toBeInViewport({ ratio: 1 });
   });
 }
 
