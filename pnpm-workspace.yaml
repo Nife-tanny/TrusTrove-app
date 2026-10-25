@@ -28,11 +28,20 @@ auditConfig:
     - GHSA-x97p-jq2g-jp4f
     # SDK Zod 3.25.76 is patched in patches/zod@3.25.76.patch; see SECURITY.md.
     - GHSA-mrhx-c7xc-m3w5
-    # Sharp >=0.35.5 is the upstream mitigation for this Next 14 image optimizer.
+    # Next 14.2.35 image optimization is mitigated by patched Sharp; Server
+    # Actions are not used. Reassess both advisories with the Next 15 upgrade.
     - GHSA-2464-fhr4-w9xw
     # The app defines no Server Actions; the advisory states these apps are unaffected.
     - GHSA-p3m5-59mp-jv5r
+    # braces is build-time only; no patched release is available yet.
     - GHSA-vfj7-8cjw-p6xm
+    # toml 3.0.0 via @stellar/stellar-sdk; the workspace override selects 5.0.1.
+    - GHSA-4qx8-w7c3-pj3p
+    - GHSA-9j65-hcg3-gc64
+    - GHSA-9qmh-m7c6-f92p
+    - GHSA-mrv2-3pqr-j5jr
+    # dompurify via jspdf; the workspace override selects fixed 3.4.17.
+    - GHSA-cg2g-xh64-v4q7
 overrides:
   postcss: '>=8.5.18 <9'
   nanoid: '>=3.3.18 <4'
