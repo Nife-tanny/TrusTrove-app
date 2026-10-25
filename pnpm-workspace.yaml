@@ -26,18 +26,26 @@ auditConfig:
     - GHSA-m8m8-qj5v-23w3
     - GHSA-r4gj-5m52-g5wh
     - GHSA-x97p-jq2g-jp4f
-    # braces: build-time only (tailwindcss/fast-glob/chokidar/micromatch); the
-    # advisory has no patched release yet, so there is nothing to override to
+    # SDK Zod 3.25.76 is patched in patches/zod@3.25.76.patch; see SECURITY.md.
+    - GHSA-mrhx-c7xc-m3w5
+    # Sharp >=0.35.5 is the upstream mitigation for this Next 14 image optimizer.
+    - GHSA-2464-fhr4-w9xw
+    # The app defines no Server Actions; the advisory states these apps are unaffected.
+    - GHSA-p3m5-59mp-jv5r
     - GHSA-vfj7-8cjw-p6xm
 overrides:
-  postcss: ">=8.5.18 <9"
-  nanoid: ">=3.3.18 <4"
-  js-yaml: ">=4.3.2 <5"
-  glob: ">=12.0.0 <13"
-  brace-expansion@1: ">=1.1.18 <2"
-  brace-expansion@5: ">=5.0.9 <6"
-  undici: ">=7.30.1 <8"
-  axios: ">=1.20.0 <2"
-  follow-redirects: ">=1.16.1 <2"
-  vite: ">=8.1.6 <9"
-  source-map-js: ">=1.2.2 <2"
+  postcss: '>=8.5.18 <9'
+  nanoid: '>=3.3.18 <4'
+  js-yaml: '>=4.3.2 <5'
+  glob: '>=12.0.0 <13'
+  brace-expansion@1: '>=1.1.18 <2'
+  brace-expansion@5: '>=5.0.9 <6'
+  undici: '>=7.30.1 <8'
+  toml: '>=5.0.1 <6'
+  dompurify: '>=3.4.17 <4'
+  axios: '>=1.20.0 <2'
+  follow-redirects: '>=1.16.1 <2'
+  vite: '>=8.1.6 <9'
+  source-map-js: '>=1.2.2 <2'
+patchedDependencies:
+  zod@3.25.76: patches/zod@3.25.76.patch

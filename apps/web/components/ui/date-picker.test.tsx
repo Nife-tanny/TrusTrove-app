@@ -8,6 +8,8 @@ const calendarState = vi.hoisted(() => ({
 }));
 
 // Fixed dates the mock calendar renders so consumers can assert disabled state.
+// Use UTC timestamps so the calendar's simulated day values remain stable across
+// local timezones and CI machines.
 const MOCK_DATES = [
   new Date(Date.UTC(2026, 0, 5)),
   new Date(Date.UTC(2026, 0, 10)),
